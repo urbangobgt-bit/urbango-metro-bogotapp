@@ -1,0 +1,6 @@
+{
+  "name": "UrbanGo - Metro de Bogotá",
+  "description": "Aplicación interactiva y plataforma ciudadana de la Primera Línea del Metro de Bogotá con modelo 3D del vagón, mapa interactivo en vivo, consulta de saldo de tarjeta, reportes de avances de obra, bolsa de empleo y asistente virtual MetroBot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

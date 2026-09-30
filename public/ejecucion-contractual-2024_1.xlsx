@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Empresa Metro de Bogota S.A.</Author>
+  <Title>Ejecución Contractual y Auditoría de Contratos</Title>
+  <Created>2026-03-27T00:00:00Z</Created>
+ </DocumentProperties>
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF" ss:FontName="Calibri" ss:Size="11"/>
+   <Interior ss:Color="#B30000" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+  </Style>
+  <Style ss:ID="Title">
+   <Font ss:Bold="1" ss:Color="#18181B" ss:FontName="Calibri" ss:Size="14"/>
+  </Style>
+  <Style ss:ID="Data">
+   <Font ss:FontName="Calibri" ss:Size="10"/>
+  </Style>
+  <Style ss:ID="Currency">
+   <Font ss:FontName="Calibri" ss:Size="10"/>
+   <NumberFormat ss:Format="$#,##0"/>
+  </Style>
+  <Style ss:ID="Percent">
+   <Font ss:FontName="Calibri" ss:Size="10"/>
+   <NumberFormat ss:Format="0.0%"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Ejecución Contractual">
+  <Table>
+   <Column ss:Width="110"/>
+   <Column ss:Width="260"/>
+   <Column ss:Width="180"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="130"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="100"/>
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="6" ss:StyleID="Title"><Data ss:Type="String">EMPRESA METRO DE BOGOTÁ S.A. - EJECUCIÓN CONTRACTUAL Y ADICIONES</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:StyleID="Header"><Data ss:Type="String">No. Contrato</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Objeto Contractual</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Contratista / Titular</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Valor Total Asignado</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Adiciones / Otrosíes</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Estado / Fase</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">% Avance Ejecutado</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">163 de 2019</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Concesión Diseño, Construcción, Operación y Mantenimiento PLMB Tramo 1</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Metro Línea 1 S.A.S.</Data></Cell>
+    <Cell ss:StyleID="Currency"><Data ss:Type="Number">12900000000000</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Otrosí No. 4 y No. 5 suscritos</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Construcción activa</Data></Cell>
+    <Cell ss:StyleID="Percent"><Data ss:Type="Number">0.7072</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">148 de 2020</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Interventoría Integral del Proyecto Primera Línea del Metro</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Consorcio Supervisor L1</Data></Cell>
+    <Cell ss:StyleID="Currency"><Data ss:Type="Number">227000000000</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Seguimiento mensual y semestral</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Supervisión integral</Data></Cell>
+    <Cell ss:StyleID="Percent"><Data ss:Type="Number">0.7845</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">151 de 2018</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Consultoría PMO Gerencia Especializada de Proyectos</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Consorcio PMO Metro</Data></Cell>
+    <Cell ss:StyleID="Currency"><Data ss:Type="Number">65000000000</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Acompañamiento vigencia 2025</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">En ejecución</Data></Cell>
+    <Cell ss:StyleID="Percent"><Data ss:Type="Number">0.8682</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">153 de 2025</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Estructuración Espacio Público Monumento a Los Héroes</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Consorcio Héroes Renace</Data></Cell>
+    <Cell ss:StyleID="Currency"><Data ss:Type="Number">3450000000</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Acuerdo Distrital 927 de 2024</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Precontractual / Inicio 2026</Data></Cell>
+    <Cell ss:StyleID="Percent"><Data ss:Type="Number">0.1500</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">159 de 2025</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Interventoría Estructuración Monumento a Los Héroes</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Interventoría Patrimonio Urbano</Data></Cell>
+    <Cell ss:StyleID="Currency"><Data ss:Type="Number">680000000</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Contrato suscrito nov 2025</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Fase preparatoria</Data></Cell>
+    <Cell ss:StyleID="Percent"><Data ss:Type="Number">0.1200</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">198 de 2024</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Estudios y Factibilidad Expansión Red Metroferroviaria y Línea 3</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Región Metropolitana - EMB - FDN</Data></Cell>
+    <Cell ss:StyleID="Currency"><Data ss:Type="Number">18500000000</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Convenio Marco 125 de 2024</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Fase I Red Férrea Soacha</Data></Cell>
+    <Cell ss:StyleID="Percent"><Data ss:Type="Number">0.0429</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">GIPPF-LPI-001-2023</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Licitación Concesión Línea 2 Subterránea (15.5 km, 11 estaciones)</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">APCA 3 y APCA 4 (Precalificados habilitados)</Data></Cell>
+    <Cell ss:StyleID="Currency"><Data ss:Type="Number">34900000000000</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">10 adendas emitidas previa No Objeción BID</Data></Cell>
+    <Cell ss:StyleID="Data"><Data ss:Type="String">Recepción ofertas 2026</Data></Cell>
+    <Cell ss:StyleID="Percent"><Data ss:Type="Number">0.0031</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+</Workbook>
