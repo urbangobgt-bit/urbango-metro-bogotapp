@@ -15,6 +15,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase, isMocking, empleoData } from './supabaseClient';
 import InteractiveMap from './components/InteractiveMap';
+import MetroBot from './components/MetroBot';
 import Landing3D from './Landing3D';
 import SaldoCard, { SaldoModal } from './components/SaldoCard';
 import SettingsModal from './components/SettingsModal';
@@ -460,6 +461,8 @@ export default function App() {
   const [detailItem, setDetailItem] = useState(null);
   const [toast, setToast] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [mapFocusStation, setMapFocusStation] = useState(null);
+  const [chatInitialQuery, setChatInitialQuery] = useState('');
   const [isGlobalPortalModalOpen, setIsGlobalPortalModalOpen] = useState(false);
   const [selectedJobForModal, setSelectedJobForModal] = useState(null);
   const [selectedNewsOrJob, setSelectedNewsOrJob] = useState({
@@ -1571,7 +1574,19 @@ export default function App() {
                       }
                       if (payload === 'scrollToJob') setScrollToJob(true);
                     }} setIsChatOpen={setIsChatOpen} />}
-                    {currentTab === 'mapa'     && <InteractiveMap stations={STATIONS} onShowDetail={setDetailItem} dark={dark} t={t} />}
+                    {currentTab === 'mapa'     && (
+                      <InteractiveMap 
+                        stations={STATIONS} 
+                        onShowDetail={setDetailItem} 
+                        dark={dark} 
+                        t={t} 
+                        focusStationId={mapFocusStation}
+                        onAskMetroBot={(query) => {
+                          setChatInitialQuery(query);
+                          setIsChatOpen(true);
+                        }}
+                      />
+                    )}
                     {currentTab === 'noticias' && <NoticiasTab dark={dark} saved={savedItems} onSave={toggleSave} onShare={shareLink} onShowDetail={setDetailItem} scrollToJob={scrollToJob} setScrollToJob={setScrollToJob} />}
                     {currentTab === 'estado'   && <ProjectStatus dark={dark} />}
                     {currentTab === 'foro'     && <ForoTab dark={dark} user={user} />}
@@ -1585,12 +1600,16 @@ export default function App() {
                   </div>
                 </main>
 
-                {/* Modales (dentro del contenedor principal) */}
-                <ChatModal 
+                {/* MetroBot IA Modal */}
+                <MetroBot 
                   isOpen={isChatOpen} 
-                  onClose={() => setIsChatOpen(false)} 
+                  onClose={() => {
+                    setIsChatOpen(false);
+                    setChatInitialQuery('');
+                  }} 
                   dark={dark} 
-                  onNavigate={(tab) => {
+                  initialQuery={chatInitialQuery}
+                  onNavigate={(tab, payload) => {
                     if (tab === 'empleo' || tab === 'noticias') {
                       setSelectedNewsOrJob({
                         isOpen: true,
@@ -1599,9 +1618,19 @@ export default function App() {
                       });
                     } else if (tab === 'estado') {
                       setIsProjectStatusOpen(true);
+                    } else if (tab === 'mapa') {
+                      setCurrentTab('mapa');
+                      if (payload?.stationId || payload?.code) {
+                        setMapFocusStation(payload.stationId || payload.code);
+                      }
                     } else {
                       setCurrentTab(tab);
                     }
+                  }}
+                  onFocusStation={(station) => {
+                    setCurrentTab('mapa');
+                    setMapFocusStation(station.id || station.code || station.name);
+                    setIsChatOpen(false);
                   }}
                   onOpenProjectStatus={() => setIsProjectStatusOpen(true)}
                   onShowDetail={setDetailItem}
@@ -3604,420 +3633,8 @@ const RenderBotText = ({ text, dark, onAction, onAsk }) => {
   );
 };
 
-const CHIP_SUGGESTIONS = {
-  es: [
-    '👥 ¿Cuál es el aforo y capacidad de personas?',
-    '📍 ¿Cuáles estaciones me quedan cerca de Kennedy?',
-    '📍 ¿Dónde queda el Patio Taller?',
-    '🔄 ¿Dónde puedo hacer trasbordo con TransMilenio?',
-    '⏱️ ¿Cuánto tiempo tomará ir desde Kennedy al Centro?',
-    '⚡ ¿A qué velocidad irá el tren?',
-    '💳 ¿Cuál es la tarifa y cómo se paga?',
-    '🚧 Estado de avance de obra (82.33%)',
-    '🗺️ Ver estaciones en el Mapa Interactivo'
-  ],
-  en: [
-    '👥 What is the passenger capacity and volume?',
-    '📍 Which stations are located in Kennedy?',
-    '📍 Where is the Patio Taller located?',
-    '🔄 Where can I transfer to TransMilenio?',
-    '⏱️ Travel time from Kennedy to Downtown?',
-    '⚡ What is the commercial speed of the trains?',
-    '💳 How do fares and payments work?',
-    '🚧 Work progress status (82.33%)',
-    '🗺️ Stations and Interactive Map'
-  ],
-  pt: [
-    '👥 Qual é a capacidade e lotação de passageiros?',
-    '📍 Quais estações ficam em Kennedy?',
-    '📍 Onde fica o Pátio Taller?',
-    '🔄 Onde posso fazer baldeação com TransMilenio?',
-    '⏱️ Quanto tempo leva de Kennedy ao Centro?',
-    '⚡ Qual é a velocidade do trem?',
-    '💳 Qual é a tarifa e como se paga?',
-    '🚧 Status de avanço da obra (82.33%)',
-    '🗺️ Estações no Mapa Interativo'
-  ],
-  zh: [
-    '👥 地铁列车与车站的额定载客量是多少？',
-    '📍 肯尼迪区 (Kennedy) 有哪些车站？',
-    '📍 车场 (Patio Taller) 建在哪里？',
-    '🔄 哪里可以换乘快速公交 TransMilenio？',
-    '⏱️ 从肯尼迪到市中心需要多久？',
-    '⚡ 地铁列车的最高速度与平均时速是多少？',
-    '💳 地铁票价是多少以及如何支付？',
-    '🚧 查看施工进度状态 (82.33%)',
-    '🗺️ 在交互式地图中查看车站'
-  ],
-  ja: [
-    '👥 列車の定員と輸送能力はどのくらい？',
-    '📍 ケネディ区の駅はどこ？',
-    '📍 車両基地 (Patio Taller) はどこにある？',
-    '🔄 トランスミレニオとの乗換駅は？',
-    '⏱️ ケネディから中心街までの所要時間は？',
-    '⚡ 電車の運行速度は？',
-    '💳 運賃体系と支払い方法は？',
-    '🚧 工事進捗状況を確認 (82.33%)',
-    '🗺️ インタラクティブマップで駅を確認'
-  ]
-};
-
-const getInitialBotMessage = (language) => {
-  const l = (language || 'es').toLowerCase();
-  if (l === 'ja') {
-    return `こんにちは！私は **MetroBot IA** 🤖、ボゴタ地下鉄1号線の公式AIアシスタントです。\n\n輸送定員（1編成1,800名、最大72,000名/時/方向）、工事進捗率82.33%、ケネディ区やボサ区の駅、求人情報、TuTarjetaMetroのチャージについて何でもお尋ねください。\n\n[SUGERENCIAS]\n- 👥 列車の定員と輸送能力はどのくらい？\n- 📍 ケネディ区の駅はどこ？\n- 🚧 工事進捗状況を確認 (82.33%)\n- 🗺️ インタラクティブマップで駅を確認`;
-  }
-  if (l === 'zh') {
-    return `您好！我是 **MetroBot IA** 🤖，波哥大地铁一号线官方智能助手。\n\n您可以向我咨询额定载客容量（单列1,800人、高峰每小时72,000人次）、工程进度（82.33%）、肯尼迪或博萨区车站、公交换乘或TuTarjetaMetro充值。\n\n[SUGERENCIAS]\n- 👥 地铁列车与车站的额定载客量是多少？\n- 📍 肯尼迪区 (Kennedy) 有哪些车站？\n- 🚧 查看施工进度状态 (82.33%)\n- 🗺️ 在交互式地图中查看车站`;
-  }
-  if (l === 'pt') {
-    return `Olá! Sou o **MetroBot IA** 🤖, assistente inteligente oficial da Primeira Linha do Metrô de Bogotá.\n\nVocê pode me perguntar sobre capacidade e lotação (1.800 passageiros/trem, 72.000 p/h/s), 82.33% de avanço, estações em Kennedy ou Bosa, baldeações e tarifas.\n\n[SUGERENCIAS]\n- 👥 Qual é a capacidade e lotação de passageiros?\n- 📍 Quais estações ficam em Kennedy?\n- 🚧 Ver status de avanço da obra (82.33%)\n- 🗺️ Ver estações no Mapa Interativo`;
-  }
-  if (l === 'en') {
-    return `Hello! I am **MetroBot AI** 🤖, the official intelligent assistant for Bogotá Metro Line 1.\n\nYou can ask me about passenger capacity (1,800 pax/train, 72,000 pphpd), 82.33% work progress, stations in Kennedy or Bosa, TransMilenio transfers, and fares.\n\n[SUGERENCIAS]\n- 👥 What is the passenger capacity and volume?\n- 📍 Which stations are located in Kennedy?\n- 🚧 View work progress status (82.33%)\n- 🗺️ View stations on the Interactive Map`;
-  }
-  return `¡Hola! Soy **MetroBot IA** 🤖, el asistente virtual inteligente oficial de la Empresa Metro de Bogotá (EMB) y UrbanGo.\n\nPuedes consultarme sobre el aforo y capacidad de personas (1.800 pax/tren, 72.000 pax/hora/sentido), avance de obra del 82.33%, estaciones en Kennedy y Bosa, trasbordos y tarifas.\n\n[SUGERENCIAS]\n- 👥 ¿Cuál es el aforo y capacidad de personas?\n- 📍 ¿Cuáles estaciones me quedan cerca de Kennedy?\n- 📍 ¿Dónde queda el Patio Taller?\n- 🗺️ Ver estaciones en el Mapa Interactivo`;
-};
-
-const ChatModal = ({ 
-  isOpen, 
-  onClose, 
-  dark,
-  onNavigate,
-  onShowDetail,
-  onOpenJobModal,
-  onReportIncident,
-  onOpenNewsOrJob,
-  onOpenProjectStatus
-}) => {
-  const { t, lang, setLang } = useI18n();
-  const activeLangKey = (lang || 'es').toLowerCase();
-  const suggestions = CHIP_SUGGESTIONS[activeLangKey] || CHIP_SUGGESTIONS.es;
-
-  const [chat, setChat] = useState(() => [{ 
-    role: 'bot', 
-    text: getInitialBotMessage(lang) 
-  }]);
-  const [loading, setLoading] = useState(false);
-  const [input, setInput] = useState('');
-  const bottomRef = useRef(null);
-  const prevLangRef = useRef(lang);
-
-  // Sync welcome message and suggestions dynamically when language switches or modal opens
-  useEffect(() => {
-    if (prevLangRef.current !== lang) {
-      prevLangRef.current = lang;
-      setChat([{ role: 'bot', text: getInitialBotMessage(lang) }]);
-    } else if (isOpen) {
-      setChat(prev => (prev.length <= 1 ? [{ role: 'bot', text: getInitialBotMessage(lang) }] : prev));
-    }
-  }, [lang, isOpen]);
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chat, loading]);
-
-  const handleBotAction = (actionId, label) => {
-    const cleanId = (actionId || '').replace(/^#/, '');
-
-    // Requerimiento: [📰 Ver Detalle de Noticia/Empleo](#open_content) y enlaces afines
-    if (cleanId === 'open_content' || cleanId === 'open_content_news' || cleanId === 'open_news_or_job') {
-      if (onOpenNewsOrJob) {
-        onOpenNewsOrJob('noticias', null);
-      }
-      return;
-    }
-
-    if (cleanId === 'open_content_jobs') {
-      if (onOpenNewsOrJob) {
-        onOpenNewsOrJob('empleo', null);
-      }
-      return;
-    }
-
-    if (cleanId === 'news_1' || cleanId === 'open_news_1') {
-      if (onOpenNewsOrJob) {
-        onOpenNewsOrJob('noticias', 'news_1');
-        return;
-      }
-      const newsItem = NEWS.find(n => n.id === 'news_1' || n.numericId === 0) || NOTICIAS_KB.find(n => n.id === 'news_1');
-      if (newsItem && onShowDetail) {
-        onShowDetail(newsItem);
-      }
-      return;
-    }
-
-    if (cleanId === 'news_2' || cleanId === 'open_news_2') {
-      if (onOpenNewsOrJob) {
-        onOpenNewsOrJob('noticias', 'news_2');
-        return;
-      }
-      const newsItem = NEWS.find(n => n.id === 'news_2' || n.numericId === 1) || NOTICIAS_KB.find(n => n.id === 'news_2');
-      if (newsItem && onShowDetail) {
-        onShowDetail(newsItem);
-      }
-      return;
-    }
-
-    if (cleanId === 'job_1' || cleanId === 'apply_job_1') {
-      if (onOpenNewsOrJob) {
-        onOpenNewsOrJob('empleo', 'job_1');
-        return;
-      }
-      const job = EMPLEOS_KB.find(j => j.id === 'job_1') || EMPLEOS_KB[0];
-      if (onOpenJobModal) {
-        onOpenJobModal(job);
-      }
-      return;
-    }
-
-    if (cleanId === 'job_2' || cleanId === 'apply_job_2') {
-      if (onOpenNewsOrJob) {
-        onOpenNewsOrJob('empleo', 'job_2');
-        return;
-      }
-      const job = EMPLEOS_KB.find(j => j.id === 'job_2') || EMPLEOS_KB[1];
-      if (onOpenJobModal) {
-        onOpenJobModal(job);
-      }
-      return;
-    }
-
-    if (cleanId === 'open_portal_empleo') {
-      if (onOpenNewsOrJob) {
-        onOpenNewsOrJob('empleo', null);
-        return;
-      }
-      if (onOpenJobModal) {
-        onOpenJobModal(null);
-      }
-      return;
-    }
-
-    if (cleanId === 'action_recharge' || cleanId === 'nav_saldo' || cleanId === 'open_saldo' || cleanId === 'tullave' || cleanId === 'saldo_tarjeta') {
-      if (onNavigate) {
-        onNavigate('saldo');
-        onClose();
-      }
-      return;
-    }
-
-    if (cleanId === 'action_map' || cleanId === 'nav_mapa') {
-      if (onNavigate) {
-        onNavigate('mapa');
-        onClose();
-      }
-      return;
-    }
-
-    if (cleanId === 'open_project_status' || cleanId === 'action_status' || cleanId === 'nav_estado' || cleanId === 'estado_obra' || cleanId === 'open_estado') {
-      if (onOpenProjectStatus) {
-        onOpenProjectStatus();
-        return;
-      }
-      if (onNavigate) {
-        onNavigate('estado');
-        onClose();
-      }
-      return;
-    }
-
-    if (cleanId === 'action_profile' || cleanId === 'nav_perfil') {
-      if (onNavigate) {
-        onNavigate('perfil');
-        onClose();
-      }
-      return;
-    }
-
-    if (cleanId === 'action_report' || cleanId === 'report_incident') {
-      if (onReportIncident) {
-        onReportIncident();
-        onClose();
-      }
-      return;
-    }
-  };
-
-  const ask = async (overrideMsg) => {
-    const msg = (overrideMsg || input).trim();
-    if (!msg || loading) return;
-    setChat(prev => [...prev, { role: 'user', text: msg }]);
-    setInput('');
-    setLoading(true);
-    setTimeout(async () => {
-      const res = await callMetroAI(msg, lang, t);
-      setChat(prev => [...prev, { role: 'bot', text: res }]);
-      setLoading(false);
-    }, 600);
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div 
-      className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      <div 
-        onClick={e => e.stopPropagation()}
-        className={`w-full sm:max-w-lg sm:rounded-3xl h-[100dvh] sm:h-[650px] sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border ${
-          dark ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-zinc-200'
-        }`}
-      >
-        {/* Header */}
-        <div className={`p-4 sm:p-5 border-b flex justify-between items-center shadow-sm shrink-0 ${
-          dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'
-        }`}>
-          <div className="flex items-center gap-3 min-w-0">
-            <MetroBotAvatar size={44} showStatus={true} isOnline={true} />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className={`font-black italic leading-tight text-base sm:text-lg ${dark ? 'text-white' : 'text-zinc-900'}`}>MetroBot IA</h3>
-                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#B30000] text-white shrink-0">
-                  {t('metroBot.badgeOfficial', 'Oficial EMB')}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="w-2 h-2 bg-[#2D8B3C] rounded-full animate-pulse shrink-0" />
-                <span className={`text-[10px] font-bold uppercase tracking-widest truncate ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {activeLangKey === 'zh' ? '在线智能助手 (西 · 英 · 葡 · 中 · 日)' :
-                   activeLangKey === 'en' ? 'Online AI Assistant (ES · EN · PT · ZH · JA)' :
-                   activeLangKey === 'pt' ? 'Assistente Virtual Online (ES · EN · PT · ZH · JA)' :
-                   activeLangKey === 'ja' ? 'オンラインAIアシスタント (西・英・葡・中・日)' :
-                   'Asistente Virtual en Línea (ES · EN · PT · ZH · JA)'}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Quick in-chat language selector */}
-            <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-xl border border-zinc-200 dark:border-zinc-700">
-              {[
-                { code: 'es', label: 'ES' },
-                { code: 'en', label: 'EN' },
-                { code: 'pt', label: 'PT' },
-                { code: 'zh', label: '中文' },
-                { code: 'ja', label: '日本語' }
-              ].map(item => (
-                <button
-                  key={item.code}
-                  type="button"
-                  onClick={() => setLang(item.code)}
-                  className={`px-1.5 py-0.5 rounded-lg text-[9px] font-black tracking-wider transition-all ${
-                    activeLangKey === item.code
-                      ? 'bg-[#B30000] text-white shadow-xs'
-                      : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                  }`}
-                  title={`Cambiar a ${item.label}`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <button 
-              onClick={onClose} 
-              className={`p-1.5 rounded-full transition-colors ${dark ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100'}`}
-              aria-label={t('metroBot.closeChat', 'Cerrar chat')}
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* Mensajes */}
-        <div className={`flex-1 min-h-0 overflow-y-auto p-4 ${dark ? 'bg-zinc-950' : 'bg-zinc-50'}`}>
-          <div className="text-center mb-6">
-            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${dark ? 'text-zinc-500 bg-zinc-800' : 'text-zinc-400 bg-zinc-200'}`}>{t('bot_hoy', 'Hoy')}</span>
-          </div>
-          {chat.map((c, i) => (
-            <div key={i} className={`mb-4 flex ${c.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[88%] rounded-3xl px-4 sm:px-5 py-3 sm:py-3.5 shadow-sm text-xs sm:text-sm font-medium leading-relaxed ${
-                c.role === 'user' 
-                  ? 'bg-[#B30000] text-white rounded-br-sm' 
-                  : dark 
-                    ? 'bg-zinc-900 text-zinc-100 border border-zinc-800 rounded-bl-sm' 
-                    : 'bg-white text-zinc-900 border border-zinc-200 rounded-bl-sm'
-              }`}>
-                {c.role === 'bot' ? (
-                  <RenderBotText text={c.text} dark={dark} onAction={handleBotAction} onAsk={(q) => ask(q)} />
-                ) : (
-                  c.text
-                )}
-              </div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex items-end gap-2">
-              <div className="mb-1 shrink-0">
-                <MetroBotAvatar size={32} showStatus={false} />
-              </div>
-              <div className={`px-5 py-4 rounded-3xl rounded-bl-none border shadow-sm flex gap-1.5 ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'}`}>
-                <div className="w-2.5 h-2.5 bg-[#B30000] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2.5 h-2.5 bg-[#B30000] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2.5 h-2.5 bg-[#B30000] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          )}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Footer con Chips y Barra de Input */}
-        <div className={`shrink-0 p-3 sm:p-4 border-t flex flex-col gap-2.5 ${
-          dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'
-        }`}>
-          {/* Chips de sugerencias rápidas */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
-            {suggestions.map(s => (
-              <button 
-                key={s} 
-                onClick={() => ask(s)}
-                className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-95 ${
-                  dark 
-                    ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white' 
-                    : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-zinc-200'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-
-          {/* Formulario de Input */}
-          <form 
-            onSubmit={(e) => { e.preventDefault(); ask(); }} 
-            className="flex items-center gap-2 w-full"
-          >
-            <input 
-              value={input} 
-              onChange={e => setInput(e.target.value)} 
-              placeholder={
-                activeLangKey === 'zh' ? '向我咨询新闻、工作、余额或车站...' :
-                activeLangKey === 'en' ? 'Ask me about news, jobs, balance or stations...' :
-                activeLangKey === 'pt' ? 'Pergunte-me sobre notícias, vagas, saldo ou estações...' :
-                activeLangKey === 'ja' ? 'ニュース、求人、残高、駅について質問...' :
-                'Pregúntame sobre noticias, empleos, saldo o estaciones...'
-              }
-              className={`flex-1 min-w-0 border rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#B30000] focus:ring-2 focus:ring-[#B30000]/20 transition-all ${
-                dark 
-                  ? 'bg-zinc-800 text-white border-zinc-700 placeholder-zinc-500' 
-                  : 'bg-zinc-50 border-zinc-300 text-zinc-900 placeholder-zinc-400'
-              }`} 
-            />
-            <button 
-              type="submit" 
-              disabled={loading || !input.trim()} 
-              className="bg-[#B30000] hover:bg-[#8e0000] disabled:opacity-40 text-white p-2.5 sm:p-3 rounded-2xl shadow-md active:scale-95 transition-all shrink-0 flex items-center justify-center"
-              aria-label={t('metroBot.btnSend', 'Enviar mensaje')}
-            >
-              <Send size={18} />
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
+// MetroBot IA Componente Oficial
+const ChatModal = MetroBot;
 
 const BubblesHero = ({ onNavigate, dark }) => {
   const { t, lang, setLang } = useI18n();
