@@ -19,6 +19,7 @@ import {
 import { supabase, isMocking } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18nContext';
+import { sanitizeInput, sanitizeFormData } from '../utils/securitySanitizer';
 
 // Authentic initial community seed incidents
 const INITIAL_INCIDENTS = [
@@ -165,24 +166,26 @@ export const RoadIncidentsModule = ({ dark = false }) => {
     }
   };
 
-  // Submit new incident
+  // Submit new incident con sanitización contra SQL Injection
   const handleSubmitReport = async (e) => {
     e.preventDefault();
-    if (!newLocation.trim() || !newDescription.trim()) return;
+    const cleanLocation = sanitizeInput(newLocation.trim(), 140);
+    const cleanDescription = sanitizeInput(newDescription.trim(), 1000);
+    if (!cleanLocation || !cleanDescription) return;
 
     setIsSubmitting(true);
 
-    const newIncident = {
+    const newIncident = sanitizeFormData({
       id: `inc-${Date.now()}`,
       user_id: currentUserId,
       author_name: currentUserName,
-      location: newLocation.trim(),
+      location: cleanLocation,
       category: newCategory,
       severity: newSeverity,
-      description: newDescription.trim(),
+      description: cleanDescription,
       created_at: new Date().toISOString(),
       votes: 1
-    };
+    });
 
     // Optimistic insert
     const updated = [newIncident, ...incidents];

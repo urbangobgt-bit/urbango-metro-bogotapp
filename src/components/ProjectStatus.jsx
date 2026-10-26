@@ -23,6 +23,7 @@ import { useAuth } from '../context/AuthContext';
 import { INDICADORES_L1MB } from '../data/metroOfficialData';
 import IndicadoresAvanceL1MB from './IndicadoresAvanceL1MB';
 import { supabase, isMocking } from '../supabaseClient';
+import { sanitizeInput, sanitizeFormData } from '../utils/securitySanitizer';
 
 // 16 L1 Stations for quick selector in modal
 const QUICK_STATIONS = [
@@ -237,18 +238,22 @@ export const ProjectStatus = ({ dark = false, initialOpenModal = false }) => {
     }
   };
 
-  // Submit quick incident modal
+  // Submit quick incident modal con sanitización contra SQL Injection
   const handleSubmitIncident = async (e) => {
     e.preventDefault();
-    const finalLocation = nearbyStation 
-      ? `${nearbyStation}${locationInput.trim() ? ` · ${locationInput.trim()}` : ''}`
-      : locationInput.trim();
+    const cleanLocationInput = sanitizeInput(locationInput.trim(), 120);
+    const cleanDescription = sanitizeInput(description.trim(), 1000);
+    const cleanNearbyStation = sanitizeInput(nearbyStation.trim(), 120);
 
-    if (!finalLocation || !description.trim()) return;
+    const finalLocation = cleanNearbyStation 
+      ? `${cleanNearbyStation}${cleanLocationInput ? ` · ${cleanLocationInput}` : ''}`
+      : cleanLocationInput;
+
+    if (!finalLocation || !cleanDescription) return;
 
     setIsSubmitting(true);
 
-    const newIncident = {
+    const newIncident = sanitizeFormData({
       id: `inc-${Date.now()}`,
       user_id: currentUserId,
       author_name: currentUserName,
@@ -256,10 +261,10 @@ export const ProjectStatus = ({ dark = false, initialOpenModal = false }) => {
       category: category,
       status: 'En Verificación', // Initial badge per requirement: "En Verificación"
       severity: 'Moderado',
-      description: description.trim(),
+      description: cleanDescription,
       created_at: new Date().toISOString(),
       votes: 1
-    };
+    });
 
     // Optimistic insert
     const updated = [newIncident, ...incidents];

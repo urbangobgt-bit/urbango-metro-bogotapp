@@ -27,6 +27,7 @@ import {
 import { useI18n } from '../i18nContext';
 import { useAuth } from '../context/AuthContext';
 import MetroCardVisual from './MetroCardVisual';
+import { sanitizeInput, sanitizeNumericOrId, sanitizeFormData } from '../utils/securitySanitizer';
 
 const NFC_CSS = `
   @keyframes nfcRipple {
@@ -251,19 +252,19 @@ export default function SaldoCard({ dark, onClose }) {
     if (cleanDigits.length < 16) return;
 
     const formatted = formatCardNumber(cleanDigits);
-    const newCard = {
+    const newCard = sanitizeFormData({
       id: `card-${Date.now()}`,
-      name: newCardName.trim() || 'TuTarjetaMetro Adicional',
+      name: sanitizeInput(newCardName.trim(), 50) || 'TuTarjetaMetro Adicional',
       type: 'Personalizada Metro / Tullave',
       number: formatted,
-      holder: cardHolder,
-      cedula: newCardCedula.trim() || cedulaInput,
+      holder: sanitizeInput(cardHolder, 60),
+      cedula: sanitizeNumericOrId(newCardCedula.trim() || cedulaInput, '.-'),
       balance: 10000,
       tag: 'Asociada',
       tagColor: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
       status: 'Activa y Operativa',
       isPrimary: false
-    };
+    });
 
     const updated = [...associatedCards, newCard];
     saveAssociatedCards(updated);

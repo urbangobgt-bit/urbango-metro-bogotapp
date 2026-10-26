@@ -104,7 +104,7 @@ export default function MetroEntranceAnimation({ onComplete, userName = 'Ciudada
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/20 border border-red-500/40 text-red-300 text-xs font-bold uppercase tracking-wider mb-2">
             <Sparkles size={12} className="text-[#FFD600]" />
-            <span>Autenticación Exitosa</span>
+            <span>{userName === 'Ciudadano Invitado' || userName === 'Ciudadano' ? 'Bienvenido a UrbanGo' : 'Autenticación Exitosa'}</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
             Bienvenido a bordo, <span className="text-[#FFD600]">{userName}</span>

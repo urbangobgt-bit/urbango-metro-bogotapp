@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase, isMocking } from '../supabaseClient';
+import { sanitizeFormData, sanitizeInput } from '../utils/securitySanitizer';
 
 const AuthContext = createContext(null);
 
@@ -399,20 +400,21 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updates) => {
     const now = new Date().toISOString();
     const current = userProfile || DEFAULT_PROFILE;
+    const cleanUpdates = sanitizeFormData(updates || {});
 
     const normalizedUpdates = {
-      ...updates,
+      ...cleanUpdates,
       updated_at: now
     };
 
-    if (updates.name && !updates.full_name) {
-      normalizedUpdates.full_name = updates.name;
+    if (cleanUpdates.name && !cleanUpdates.full_name) {
+      normalizedUpdates.full_name = cleanUpdates.name;
     }
-    if (updates.full_name && !updates.name) {
-      normalizedUpdates.name = updates.full_name;
+    if (cleanUpdates.full_name && !cleanUpdates.name) {
+      normalizedUpdates.name = cleanUpdates.full_name;
     }
-    if (updates.avatar && !updates.avatar_url && (updates.avatar.startsWith('http') || updates.avatar.startsWith('data:'))) {
-      normalizedUpdates.avatar_url = updates.avatar;
+    if (cleanUpdates.avatar && !cleanUpdates.avatar_url && (cleanUpdates.avatar.startsWith('http') || cleanUpdates.avatar.startsWith('data:'))) {
+      normalizedUpdates.avatar_url = cleanUpdates.avatar;
     }
 
     const newProfile = {
@@ -514,7 +516,8 @@ export const AuthProvider = ({ children }) => {
 
   // Sign in: Retrieves profile from persistent simulated database or Supabase
   const signIn = async (email, password) => {
-    const cleanEmail = (email || '').toLowerCase().trim();
+    // Sanitización estricta de correo electrónico contra SQL Injection y evasiones
+    const cleanEmail = (email || '').toLowerCase().trim().replace(/['"`;\\<>]/g, '').slice(0, 160);
     const existingInDb = findUserInDb(cleanEmail);
 
     if (isMocking) {
@@ -567,13 +570,15 @@ export const AuthProvider = ({ children }) => {
 
   // Sign up: Registers user, creates entry in persistent database and active session
   const signUp = async (email, password, profileData = {}) => {
-    const cleanEmail = (email || '').toLowerCase().trim();
+    // Sanitización estricta de correo y datos de perfil contra SQL Injection
+    const cleanEmail = (email || '').toLowerCase().trim().replace(/['"`;\\<>]/g, '').slice(0, 160);
+    const cleanProfileData = sanitizeFormData(profileData || {});
     const existingInDb = findUserInDb(cleanEmail);
 
     const initial = normalizeProfile(
       {
         ...(existingInDb || {}),
-        ...profileData,
+        ...cleanProfileData,
         email: cleanEmail,
         saldo: existingInDb?.saldo || 24500
       },

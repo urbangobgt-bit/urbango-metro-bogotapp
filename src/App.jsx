@@ -8,7 +8,7 @@ import {
   Send, Moon, Sun, Construction, Share2, ArrowRight, ArrowLeft, Briefcase, ExternalLink,
   MessageSquare, Bookmark, MapPin, Mail, Search, ShieldCheck,
   Download, FileText, Leaf, TrendingUp, Calendar, DollarSign, Eye, Clock, BarChart3, ChevronDown,
-  Settings, CreditCard, Menu
+  Settings, CreditCard, Menu, BookOpen
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -23,6 +23,7 @@ import MetroEntranceAnimation from './components/MetroEntranceAnimation';
 import AccessibilityMenu from './components/AccessibilityMenu';
 import PortalEmpleoModal from './components/PortalEmpleoModal';
 import PortalEmpleoView from './components/PortalEmpleoView';
+import CulturaMetroView from './components/CulturaMetroView';
 import { getMetroBotResponse } from './utils/metroBotEngine';
 import { NOTICIAS_KB, EMPLEOS_KB } from './data/metroKnowledge';
 import IndicadoresAvanceL1MB from './components/IndicadoresAvanceL1MB';
@@ -37,6 +38,9 @@ import ProfileAvatarSelector, { RenderUserAvatar } from './components/ProfileAva
 import ProjectStatus from './components/ProjectStatus';
 import NewsAndJobsModal from './components/NewsAndJobsModal';
 import ProjectStatusModal from './components/ProjectStatusModal';
+import NewsModule from './components/NewsModule';
+import EmploymentModule from './components/EmploymentModule';
+import { sanitizeSearchQuery, sanitizeInput, sanitizeFormData } from './utils/securitySanitizer';
 
 // Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -392,10 +396,11 @@ export default function App() {
     }
   }, [authLoading, isAuthenticated, userProfile]);
 
-  // Guest login handler
+  // Guest / Enter app handler
   const handleEnterGuest = () => {
     if (isAuthenticated) {
-      navigate('/app');
+      sessionStorage.setItem('urbango_entrance_animation_seen', 'true');
+      setShowEntranceAnim(true);
       return;
     }
     const guestUser = {
@@ -413,6 +418,7 @@ export default function App() {
     setIsGuest(true);
     localStorage.setItem('urbango_is_guest', 'true');
     localStorage.setItem('urbanGoUser', JSON.stringify(guestUser));
+    sessionStorage.setItem('urbango_entrance_animation_seen', 'true');
     setShowEntranceAnim(true);
   };
 
@@ -433,6 +439,19 @@ export default function App() {
       navigate('/app', { replace: true });
     }
   }, [authLoading, isAuthenticated, isGuest, view, navigate, showEntranceAnim]);
+
+  // Mostrar animación de bienvenida en la primera entrada a la aplicación (/app) en la sesión
+  useEffect(() => {
+    if (authLoading) return;
+    const hasAccess = isAuthenticated || isGuest;
+    if (hasAccess && view.startsWith('/app')) {
+      const alreadySeen = sessionStorage.getItem('urbango_entrance_animation_seen');
+      if (!alreadySeen && !showEntranceAnim) {
+        sessionStorage.setItem('urbango_entrance_animation_seen', 'true');
+        setShowEntranceAnim(true);
+      }
+    }
+  }, [authLoading, isAuthenticated, isGuest, view, showEntranceAnim]);
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const isDark = localStorage.getItem('urbanGoTheme') === 'dark';
@@ -602,7 +621,8 @@ export default function App() {
     { id: 'apertura',        label: () => 'Apertura Comercial 2028',          icon: '📅', tab: 'noticias',       keywords: ['apertura', 'inauguracion', 'cuando', 'abre', '2028', 'fecha'] },
   ];
 
-  const computeSearchResults = (q) => {
+  const computeSearchResults = (rawQuery) => {
+    const q = sanitizeSearchQuery(rawQuery || '');
     if (!q || q.trim().length < 2) { setSearchResults([]); return; }
     const lower = q.toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // quita tildes para mejor matching
@@ -620,8 +640,9 @@ export default function App() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    const q = searchQuery.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cleanQ = sanitizeSearchQuery(searchQuery || '');
+    if (!cleanQ.trim()) return;
+    const q = cleanQ.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     setIsSearchOpen(false);
     setSearchQuery('');
     setSearchResults([]);
@@ -638,12 +659,10 @@ export default function App() {
     });
 
     if (match) {
-      if (match.tab === 'noticias') {
-        setSelectedNewsOrJob({
-          isOpen: true,
-          initialTab: (match.id === 'empleo' || match.id === 'talento') ? 'empleo' : 'noticias',
-          selectedItemId: null
-        });
+      if (match.id === 'empleo' || match.id === 'talento' || match.tab === 'empleo') {
+        setCurrentTab('empleo');
+      } else if (match.tab === 'noticias') {
+        setCurrentTab('noticias');
       } else if (match.tab === 'estado') {
         setIsProjectStatusOpen(true);
       } else {
@@ -651,11 +670,7 @@ export default function App() {
       }
     } else {
       showToast(t('redirigiendo'));
-      setSelectedNewsOrJob({
-        isOpen: true,
-        initialTab: 'noticias',
-        selectedItemId: null
-      });
+      setCurrentTab('noticias');
     }
   };
 
@@ -664,12 +679,10 @@ export default function App() {
     setIsSearchOpen(false);
     setSearchQuery('');
     setSearchResults([]);
-    if (result.tab === 'noticias') {
-      setSelectedNewsOrJob({
-        isOpen: true,
-        initialTab: (result.id === 'talento' || result.id === 'empleo') ? 'empleo' : 'noticias',
-        selectedItemId: null
-      });
+    if (result.id === 'talento' || result.id === 'empleo' || result.tab === 'empleo') {
+      setCurrentTab('empleo');
+    } else if (result.tab === 'noticias') {
+      setCurrentTab('noticias');
     } else if (result.tab === 'estado') {
       setIsProjectStatusOpen(true);
     } else {
@@ -683,11 +696,9 @@ export default function App() {
     if (item.targetSection === 'estado') {
       setIsProjectStatusOpen(true);
     } else if (item.targetSection === 'noticias') {
-      setSelectedNewsOrJob({
-        isOpen: true,
-        initialTab: 'noticias',
-        selectedItemId: null
-      });
+      setCurrentTab('noticias');
+    } else if (item.targetSection === 'empleo') {
+      setCurrentTab('empleo');
     } else if (item.targetSection) {
       setCurrentTab(item.targetSection);
     }
@@ -750,11 +761,15 @@ export default function App() {
         grave: 'Crítico'
       };
 
-      const finalLocation = incidentAddress.trim()
-        ? `${incidentAddress.trim()} (${incidentLocalidad})`
-        : `Corredor Metro · Localidad ${incidentLocalidad}`;
+      const cleanAddr = sanitizeInput(incidentAddress.trim(), 180);
+      const cleanLoc = sanitizeInput(incidentLocalidad.trim(), 80);
+      const cleanDesc = sanitizeInput(incidentDesc.trim(), 1000);
 
-      const newIncidentObj = {
+      const finalLocation = cleanAddr
+        ? `${cleanAddr} (${cleanLoc})`
+        : `Corredor Metro · Localidad ${cleanLoc}`;
+
+      const newIncidentObj = sanitizeFormData({
         id: `inc-${Date.now()}`,
         user_id: user?.id || 'citizen-global',
         author_name: userProfile?.name || user?.name || 'Ciudadano UrbanGo',
@@ -762,11 +777,11 @@ export default function App() {
         category: categoryMap[incidentType] || 'Cierres Viales',
         status: 'En Verificación', // Badge institucional
         severity: sevMap[incidentSeverity] || 'Moderado',
-        description: incidentDesc.trim() || `${typeLabels[incidentType] || 'Novedad vial'} reportada en ${finalLocation}.`,
+        description: cleanDesc || `${typeLabels[incidentType] || 'Novedad vial'} reportada en ${finalLocation}.`,
         photo: incidentPhoto?.url || null,
         created_at: new Date().toISOString(),
         votes: 1
-      };
+      });
 
       // 1. Guardar en el almacenamiento compartido de incidencias
       try {
@@ -910,6 +925,7 @@ export default function App() {
           <MetroEntranceAnimation
             userName={user?.name || userProfile?.name || 'Ciudadano'}
             onComplete={() => {
+              sessionStorage.setItem('urbango_entrance_animation_seen', 'true');
               setShowEntranceAnim(false);
               navigate('/app');
             }}
@@ -1486,8 +1502,7 @@ export default function App() {
                   {[
                     { tab: 'dashboard', icon: <Train size={18} />,        label: t('sidebar_inicio') },
                     { tab: 'mapa',      icon: <MapIcon size={18} />,       label: t('sidebar_mapa') },
-                    /* { tab: 'noticias',  icon: <Newspaper size={18} />,     label: t('sidebar_noticias') }, -- Requerimiento: Oculto del navbar/sidebar principal */
-                    /* { tab: 'estado',    icon: <Construction size={18} />,  label: t('sidebar_estado') }, -- Requerimiento: Oculto del navbar/sidebar principal al igual que noticias */
+                    { tab: 'cultura',   icon: <BookOpen size={18} />,      label: 'Cultura Metro' },
                     { tab: 'foro',      icon: <MessageSquare size={18} />, label: t('sidebar_foro') },
                     { tab: 'saldo',     icon: <CreditCard size={18} />,    label: t('saldo_title') },
                     { tab: 'perfil',    icon: <User size={18} />,          label: t('sidebar_perfil') },
@@ -1560,15 +1575,24 @@ export default function App() {
                   <div className="w-full max-w-5xl h-full flex flex-col pt-4">
                     {currentTab === 'dashboard' && <DashboardTab dark={dark} onNavigate={(tab, payload) => {
                       if (tab === 'empleo') {
-                        setSelectedNewsOrJob({ isOpen: true, initialTab: 'empleo', selectedItemId: null });
+                        setCurrentTab('empleo');
                       } else if (tab === 'noticias') {
-                        setSelectedNewsOrJob({ isOpen: true, initialTab: 'noticias', selectedItemId: null });
+                        setCurrentTab('noticias');
+                      } else if (tab === 'cultura') {
+                        setCurrentTab('cultura');
                       } else if (tab === 'estado') {
                         setIsProjectStatusOpen(true);
                       } else if (tab === 'saldo') {
                         setCurrentTab('saldo');
                       } else if (tab === 'saldo_modal') {
                         setIsSaldoModalOpen(true);
+                      } else if (tab === 'mapa') {
+                        setCurrentTab('mapa');
+                        if (payload?.stationId || payload?.code) {
+                          setMapFocusStation(payload.stationId || payload.code);
+                        }
+                      } else if (tab === 'foro') {
+                        setCurrentTab('foro');
                       } else {
                         setCurrentTab(tab);
                       }
@@ -1587,7 +1611,36 @@ export default function App() {
                         }}
                       />
                     )}
-                    {currentTab === 'noticias' && <NoticiasTab dark={dark} saved={savedItems} onSave={toggleSave} onShare={shareLink} onShowDetail={setDetailItem} scrollToJob={scrollToJob} setScrollToJob={setScrollToJob} />}
+                    {currentTab === 'cultura'  && (
+                      <CulturaMetroView 
+                        dark={dark} 
+                        onNavigate={setCurrentTab} 
+                        onOpenMetroBot={(query) => {
+                          setChatInitialQuery(query || '🌱 ¿Cuáles son las normas de cultura ciudadana y #BogotáModoMetro?');
+                          setIsChatOpen(true);
+                        }} 
+                      />
+                    )}
+                    {currentTab === 'noticias' && (
+                      <NewsModule 
+                        dark={dark} 
+                        onNavigate={setCurrentTab} 
+                        onShowDetail={setDetailItem} 
+                        saved={savedItems} 
+                        onSave={toggleSave} 
+                        onShare={shareLink} 
+                      />
+                    )}
+                    {currentTab === 'empleo' && (
+                      <EmploymentModule 
+                        dark={dark} 
+                        onNavigate={setCurrentTab} 
+                        onShowDetail={setDetailItem} 
+                        saved={savedItems} 
+                        onSave={toggleSave} 
+                        onShare={shareLink} 
+                      />
+                    )}
                     {currentTab === 'estado'   && <ProjectStatus dark={dark} />}
                     {currentTab === 'foro'     && <ForoTab dark={dark} user={user} />}
                     {currentTab === 'transparencia' && <TransparenciaTab dark={dark} />}
@@ -1610,21 +1663,33 @@ export default function App() {
                   dark={dark} 
                   initialQuery={chatInitialQuery}
                   onNavigate={(tab, payload) => {
-                    if (tab === 'empleo' || tab === 'noticias') {
-                      setSelectedNewsOrJob({
-                        isOpen: true,
-                        initialTab: tab === 'empleo' ? 'empleo' : 'noticias',
-                        selectedItemId: null
-                      });
+                    if (tab === 'empleo') {
+                      setCurrentTab('empleo');
+                      setIsChatOpen(false);
+                    } else if (tab === 'noticias') {
+                      setCurrentTab('noticias');
+                      setIsChatOpen(false);
+                    } else if (tab === 'cultura') {
+                      setCurrentTab('cultura');
+                      setIsChatOpen(false);
                     } else if (tab === 'estado') {
                       setIsProjectStatusOpen(true);
+                      setIsChatOpen(false);
+                    } else if (tab === 'saldo') {
+                      setCurrentTab('saldo');
+                      setIsChatOpen(false);
                     } else if (tab === 'mapa') {
                       setCurrentTab('mapa');
                       if (payload?.stationId || payload?.code) {
                         setMapFocusStation(payload.stationId || payload.code);
                       }
+                      setIsChatOpen(false);
+                    } else if (tab === 'foro') {
+                      setCurrentTab('foro');
+                      setIsChatOpen(false);
                     } else {
                       setCurrentTab(tab);
+                      setIsChatOpen(false);
                     }
                   }}
                   onFocusStation={(station) => {
@@ -1635,18 +1700,16 @@ export default function App() {
                   onOpenProjectStatus={() => setIsProjectStatusOpen(true)}
                   onShowDetail={setDetailItem}
                   onOpenJobModal={(job) => {
-                    setSelectedNewsOrJob({
-                      isOpen: true,
-                      initialTab: 'empleo',
-                      selectedItemId: job?.id || null
-                    });
+                    setCurrentTab('empleo');
+                    setIsChatOpen(false);
                   }}
                   onOpenNewsOrJob={(tab, itemId) => {
-                    setSelectedNewsOrJob({
-                      isOpen: true,
-                      initialTab: tab || 'noticias',
-                      selectedItemId: itemId || null
-                    });
+                    if (tab === 'empleo') {
+                      setCurrentTab('empleo');
+                    } else {
+                      setCurrentTab('noticias');
+                    }
+                    setIsChatOpen(false);
                   }}
                   onReportIncident={() => setIsReportModalOpen(true)}
                 />
@@ -1715,17 +1778,16 @@ export default function App() {
                         <span className="w-2.5 h-2.5 rounded-full bg-[#B30000] animate-pulse" />
                         <p className="font-black text-xs uppercase tracking-widest italic">Urban<span className="text-[#B30000]">-go</span> Menú</p>
                       </div>
-                      <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-red-500/10 text-[#B30000]">6 Servicios</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-red-500/10 text-[#B30000]">7 Servicios</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { id: 'dashboard', label: 'Inicio', desc: 'Resumen L1', icon: <Train size={17} />, color: 'bg-red-500/15 text-red-600 dark:text-red-400' },
                         { id: 'mapa', label: 'Mapa L1', desc: 'Estaciones', icon: <MapIcon size={17} />, color: 'bg-blue-500/15 text-blue-600 dark:text-blue-400' },
-                        /* { id: 'noticias', label: 'Noticias', desc: 'Empleo & Red', icon: <Newspaper size={17} />, color: 'bg-orange-500/15 text-orange-600 dark:text-orange-400' }, -- Oculto del menú para mantener UI limpia */
-                        /* { id: 'estado', label: 'Obras', desc: 'Frentes activos', icon: <Construction size={17} />, color: 'bg-amber-500/15 text-amber-600 dark:text-amber-400' }, -- Oculto del menú para mantener UI limpia al igual que noticias */
+                        { id: 'cultura', label: 'Cultura Metro', desc: '#BogotáModoMetro', icon: <BookOpen size={17} />, color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
                         { id: 'foro', label: 'Foro', desc: 'Comunidad', icon: <MessageSquare size={17} />, color: 'bg-purple-500/15 text-purple-600 dark:text-purple-400' },
-                        { id: 'saldo', label: 'TuLlave', desc: 'Saldo y recarga', icon: <CreditCard size={17} />, color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
+                        { id: 'saldo', label: 'TuLlave', desc: 'Saldo y recarga', icon: <CreditCard size={17} />, color: 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400' },
                         { id: 'incidencia', label: 'Reportar Vial', desc: 'Incidencia en obra', icon: <AlertTriangle size={17} />, color: 'bg-rose-500/15 text-rose-600 dark:text-rose-400', isAction: true },
                         { id: 'perfil', label: 'Mi Perfil', desc: 'Configuración', icon: <User size={17} />, color: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400' },
                       ].map(item => {
@@ -3564,20 +3626,33 @@ const RenderBotText = ({ text, dark, onAction, onAsk }) => {
         }
 
         const isBullet = line.trim().startsWith('- ');
-        let rendered = line
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em>$1</em>');
+        const rawContent = isBullet ? line.replace(/^- /, '') : line;
+
+        // Renderizado seguro sin dangerouslySetInnerHTML para neutralizar Code/Script Injection (XSS)
+        const renderSafeFormatting = (textStr) => {
+          if (!textStr) return null;
+          const tokens = textStr.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+          return tokens.map((token, tIdx) => {
+            if (token.startsWith('**') && token.endsWith('**') && token.length >= 4) {
+              return <strong key={tIdx} className="font-black text-inherit">{token.slice(2, -2)}</strong>;
+            }
+            if (token.startsWith('*') && token.endsWith('*') && token.length >= 2) {
+              return <em key={tIdx} className="italic text-inherit">{token.slice(1, -1)}</em>;
+            }
+            return token;
+          });
+        };
 
         if (isBullet) {
           return (
             <div key={i} className="flex items-start gap-2 ml-1">
               <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#B30000] flex-shrink-0" />
-              <span dangerouslySetInnerHTML={{ __html: rendered.replace(/^- /, '') }} />
+              <span>{renderSafeFormatting(rawContent)}</span>
             </div>
           );
         }
 
-        return <p key={i} dangerouslySetInnerHTML={{ __html: rendered }} />;
+        return <p key={i}>{renderSafeFormatting(rawContent)}</p>;
       })}
 
       {/* Bloque interactivo formateado de [SUGERENCIAS] */}
@@ -3642,18 +3717,25 @@ const BubblesHero = ({ onNavigate, dark }) => {
   const [hoveredColor, setHoveredColor] = useState(null);
 
   const nodes = [
-    { tab: 'mapa',     icon: <MapIcon size={18} />,       label: t('nav.map', t('sidebar_mapa')), color: 'bg-[#ea580c] text-white', glow: '#ea580c', pos: 'top-[calc(50%-115px)] left-[50%] -translate-x-1/2 -translate-y-1/2' },
+    { tab: 'mapa',     icon: <MapIcon size={18} />,       label: 'Mapa Interactivo', color: 'bg-[#ea580c] text-white', glow: '#ea580c', pos: 'top-[calc(50%-115px)] left-[50%] -translate-x-1/2 -translate-y-1/2' },
     { 
       tab: 'saldo',   
       icon: <CreditCard size={18} className="text-zinc-950" strokeWidth={2.4} />,  
-      label: t('nav.cardBalance', 'Saldo de Tarjeta'),   
+      label: 'Saldo de Tarjeta',   
       color: 'bg-yellow-400 text-zinc-950 border-white dark:border-zinc-800 shadow-lg shadow-yellow-500/25', 
       glow: '#EAB308', 
       pos: 'top-[calc(50%-36px)] left-[calc(50%+107px)] -translate-x-1/2 -translate-y-1/2' 
     },
-    { tab: 'noticias', icon: <Newspaper size={18} />,     label: t('nav.news', t('bubble_noticias')),         color: 'bg-[#1565C0] text-white', glow: '#1565C0', pos: 'top-[calc(50%+95px)] left-[calc(50%+66px)] -translate-x-1/2 -translate-y-1/2' },
-    { tab: 'empleo',   icon: <Briefcase size={18} />,     label: t('nav.jobs', t('bubble_empleo')),           color: 'bg-[#2D8B3C] text-white', glow: '#2D8B3C', pos: 'top-[calc(50%+95px)] left-[calc(50%-66px)] -translate-x-1/2 -translate-y-1/2' },
-    { tab: 'foro',     icon: <MessageSquare size={18} />, label: t('nav.forum', t('bubble_foro')),             color: 'bg-[#6B21A8] text-white', glow: '#6B21A8', pos: 'top-[calc(50%-36px)] left-[calc(50%-107px)] -translate-x-1/2 -translate-y-1/2' },
+    { tab: 'noticias', icon: <Newspaper size={18} />,     label: 'Noticias e Hitos',         color: 'bg-[#1565C0] text-white', glow: '#1565C0', pos: 'top-[calc(50%+95px)] left-[calc(50%+66px)] -translate-x-1/2 -translate-y-1/2' },
+    { 
+      tab: 'cultura',   
+      icon: <BookOpen size={18} className="text-white" />,     
+      label: 'Cultura #BogotáModoMetro',           
+      color: 'bg-[#107C41] text-white hover:bg-[#0c6233]', 
+      glow: '#107C41', 
+      pos: 'top-[calc(50%+95px)] left-[calc(50%-66px)] -translate-x-1/2 -translate-y-1/2' 
+    },
+    { tab: 'foro',     icon: <MessageSquare size={18} />, label: 'Foro Ciudadano',             color: 'bg-[#6B21A8] text-white', glow: '#6B21A8', pos: 'top-[calc(50%-36px)] left-[calc(50%-107px)] -translate-x-1/2 -translate-y-1/2' },
   ];
 
   return (
@@ -3719,6 +3801,7 @@ const Bubble = ({ icon, label, color, glowColor, pos, onClick, onMouseEnter, onM
   return (
     <button
       onClick={onClick}
+      title={label}
       onMouseEnter={() => {
         setIsHovered(true);
         onMouseEnter();
@@ -3727,7 +3810,7 @@ const Bubble = ({ icon, label, color, glowColor, pos, onClick, onMouseEnter, onM
         setIsHovered(false);
         onMouseLeave();
       }}
-      className={`absolute ${pos} flex flex-col items-center justify-center w-[74px] h-[74px] ${color} rounded-full border-2 border-white dark:border-zinc-800 shadow-xl transition-all duration-300 z-30 animate-float cursor-pointer`}
+      className={`absolute ${pos} flex flex-col items-center justify-center w-[74px] sm:w-[76px] h-[74px] sm:h-[76px] ${color} rounded-full border-2 border-white dark:border-zinc-800 shadow-xl transition-all duration-300 z-30 animate-float cursor-pointer`}
       style={{
         transform: isHovered ? 'scale(1.1)' : undefined,
         boxShadow: isHovered ? `0 0 25px ${glowColor}` : '0 10px 20px rgba(0,0,0,0.15)',
@@ -3735,7 +3818,7 @@ const Bubble = ({ icon, label, color, glowColor, pos, onClick, onMouseEnter, onM
       }}
     >
       {icon}
-      <span className="text-[7px] font-black uppercase mt-1 text-center leading-tight px-1 max-w-[62px] break-words">{label}</span>
+      <span className="text-[6.5px] font-black uppercase mt-0.5 text-center leading-tight px-1 max-w-[64px] break-words line-clamp-2">{label}</span>
     </button>
   );
 };
@@ -3744,9 +3827,21 @@ const Bubble = ({ icon, label, color, glowColor, pos, onClick, onMouseEnter, onM
 const DetailModal = ({ item, onClose, onSave, onShare, saved, dark }) => {
   const { t, lang, setLang } = useI18n();
 
-  const isSaved = saved.some(s => (s.title || s.name) === (item.title || item.name));
+  const isSaved = saved.some(s => (s.title || s.name || s.titulo) === (item.title || item.name || item.titulo));
   const img = item.img || item.image;
-  const isNewsArticle = !!(item.fullKey || item.fullText || item.fullContent);
+  const isNewsArticle = !!(
+    item.fullKey || 
+    item.fullText || 
+    item.fullContent || 
+    item.contenidoCompleto || 
+    item.content || 
+    item.resumen || 
+    item.categoria ||
+    item.category === 'obras' ||
+    item.category === 'sostenibilidad' ||
+    item.category === 'licitaciones' ||
+    item.category === 'empleo_cultura'
+  );
 
   // Buscar noticias relacionadas
   const relatedNews = isNewsArticle && item.relatedIds
@@ -3765,12 +3860,23 @@ const DetailModal = ({ item, onClose, onSave, onShare, saved, dark }) => {
           </button>
           <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm ${item.urgency === 'Alta' || item.status === 'Cerrada' ? 'bg-[#B30000] text-white' : 'bg-[#FFD600] text-zinc-900'}`}>
-                {item.type === 'breaking' ? `🔴 ${t('ultima_hora')}` : item.type || item.status || 'Ficha Técnica'}
+              <span className={`text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm ${item.urgency === 'Alta' || item.status === 'Cerrada' || item.etiqueta === 'EN VIVO' || item.isLive ? 'bg-[#B30000] text-white' : item.etiqueta === 'URGENTE' || item.isBreaking ? 'bg-amber-500 text-black' : 'bg-[#FFD600] text-zinc-900'}`}>
+                {item.etiqueta ? `🔴 ${item.etiqueta}` : item.type === 'breaking' ? `🔴 ${t('ultima_hora')}` : item.type || item.status || 'Ficha Técnica'}
               </span>
-              {item.category && <span className="text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest bg-white/20 backdrop-blur-sm text-white border border-white/20">{item.category}</span>}
+              {(item.categoria || item.categoryLabel || item.category) && (
+                <span className="text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest bg-white/20 backdrop-blur-sm text-white border border-white/20">
+                  {item.categoria || item.categoryLabel || item.category}
+                </span>
+              )}
             </div>
-            <h2 className="text-white font-black italic text-xl sm:text-3xl mt-1 leading-tight break-words">{t(item.titleKey || item.name, item.title || item.name)}</h2>
+            <h2 className="text-white font-black italic text-xl sm:text-3xl mt-1 leading-tight break-words">
+              {t(item.titleKey || item.name, item.titulo || item.title || item.name)}
+            </h2>
+            {(item.subtitulo || item.subtitle) && (
+              <p className="text-white/90 text-xs sm:text-sm font-medium mt-1.5 leading-snug line-clamp-2">
+                {item.subtitulo || item.subtitle}
+              </p>
+            )}
             {item.loc && <p className="text-white/90 text-xs sm:text-sm font-bold mt-1">{t(item.loc)}</p>}
           </div>
         </div>
@@ -3781,21 +3887,49 @@ const DetailModal = ({ item, onClose, onSave, onShare, saved, dark }) => {
         {!img && (
           <div className="mb-6">
             <button onClick={onClose} className="flex items-center gap-2 text-[#B30000] font-black uppercase text-xs tracking-widest"><ArrowRight size={16} className="rotate-180" /> {t('btn_back')}</button>
-            <h2 className={`text-2xl sm:text-3xl font-black italic tracking-tighter mt-5 leading-tight break-words ${dark ? 'text-white' : 'text-zinc-900'}`}>{t(item.titleKey || item.name, item.title || item.name)}</h2>
+            <h2 className={`text-2xl sm:text-3xl font-black italic tracking-tighter mt-5 leading-tight break-words ${dark ? 'text-white' : 'text-zinc-900'}`}>
+              {t(item.titleKey || item.name, item.titulo || item.title || item.name)}
+            </h2>
+            {(item.subtitulo || item.subtitle) && (
+              <p className={`text-sm sm:text-base font-semibold mt-2 leading-relaxed ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                {item.subtitulo || item.subtitle}
+              </p>
+            )}
           </div>
         )}
 
         {/* Barra de metadata para noticias */}
         {isNewsArticle && (
           <div className={`flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-5 pb-3 sm:pb-4 border-b ${dark ? 'border-zinc-800' : 'border-zinc-200'}`}>
-            {item.date && <span className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>📅 {item.date}</span>}
-            {item.author && <span className={`text-[10px] font-bold ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>✍️ {t(item.authorKey || item.author, item.author)}</span>}
-            {item.source && <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${dark ? 'text-zinc-400 border-zinc-700 bg-zinc-800' : 'text-zinc-500 border-zinc-200 bg-zinc-100'}`}>📰 {t(item.sourceKey || item.source, item.source)}</span>}
-            {item.readMin && <span className={`text-[10px] font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>🕐 {item.readMin} {t("news_read")}</span>}
+            {(item.fecha || item.date) && (
+              <span className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                📅 {item.fecha || item.date}
+              </span>
+            )}
+            {item.localidad && (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${dark ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : 'text-amber-700 border-amber-300 bg-amber-50'}`}>
+                📍 {item.localidad}
+              </span>
+            )}
+            {(item.author || item.autor) && (
+              <span className={`text-[10px] font-bold ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                ✍️ {t(item.authorKey || item.author || item.autor, item.author || item.autor)}
+              </span>
+            )}
+            {(item.source || item.fuente) && (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${dark ? 'text-zinc-400 border-zinc-700 bg-zinc-800' : 'text-zinc-500 border-zinc-200 bg-zinc-100'}`}>
+                📰 {t(item.sourceKey || item.source || item.fuente, item.source || item.fuente)}
+              </span>
+            )}
+            {(item.tiempoLectura || item.readMin) && (
+              <span className={`text-[10px] font-bold ${dark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                🕐 {item.tiempoLectura || `${item.readMin} ${t("news_read", "min lectura")}`}
+              </span>
+            )}
           </div>
         )}
 
-        {!isNewsArticle && item.date && <p className={`text-[10px] font-black uppercase tracking-widest mb-4 sm:mb-5 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>{item.date}</p>}
+        {!isNewsArticle && (item.fecha || item.date) && <p className={`text-[10px] font-black uppercase tracking-widest mb-4 sm:mb-5 ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>{item.fecha || item.date}</p>}
 
         {/* Barra de progreso para estaciones */}
         {item.progress && (
@@ -3813,9 +3947,23 @@ const DetailModal = ({ item, onClose, onSave, onShare, saved, dark }) => {
         {/* Contenido completo del artículo (Reader Mode) */}
         {isNewsArticle ? (
           <div className={`p-4 sm:p-6 rounded-[2rem] mb-4 sm:mb-5 border shadow-sm ${dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'}`}>
-            {(t(item.fullKey, item.fullText || '') || item.fullText || item.fullContent || '').split('\n\n').map((para, i) => (
+            {(item.subtitulo || item.subtitle) && (
+              <div className={`p-3.5 rounded-2xl mb-4 text-xs sm:text-sm font-semibold border ${dark ? 'bg-zinc-800/70 border-zinc-700/60 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-700'}`}>
+                📌 <span className="font-bold">{item.subtitulo || item.subtitle}</span>
+              </div>
+            )}
+            {(t(item.fullKey, item.fullText || '') || item.contenidoCompleto || item.fullText || item.fullContent || item.content || item.resumen || '').split('\n\n').map((para, i) => (
               <p key={i} className={`text-sm sm:text-[15px] font-medium leading-[1.8] sm:leading-[1.85] mb-4 sm:mb-5 last:mb-0 break-words ${dark ? 'text-zinc-300' : 'text-zinc-700'}`} style={{ maxWidth: '680px' }}>{para}</p>
             ))}
+            {item.url && (
+              <div className="mt-5 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Fuente Oficial Metro Bogotá</span>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-black text-[#B30000] hover:underline">
+                  <span>Abrir enlace oficial</span>
+                  <ExternalLink size={12} />
+                </a>
+              </div>
+            )}
           </div>
         ) : (
           <div className={`p-4 sm:p-6 rounded-[2rem] text-xs sm:text-sm font-medium leading-relaxed mb-4 sm:mb-5 border shadow-sm break-words ${dark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-white border-zinc-200 text-zinc-700'}`}>

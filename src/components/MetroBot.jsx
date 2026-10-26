@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { Fragment, useState, useEffect, useRef, useMemo } from 'react';
 import { 
   X, 
   Send, 
@@ -8,48 +8,51 @@ import {
   Volume2, 
   VolumeX, 
   Sparkles, 
-  Layers, 
-  CreditCard, 
-  Briefcase, 
-  TrendingUp, 
-  Clock, 
-  Share2, 
-  Check, 
-  RotateCcw
+  Briefcase,
+  Newspaper,
+  CreditCard,
+  MessageSquare,
+  Map as MapIcon,
+  HeartHandshake
 } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import MetroBotAvatar from './MetroBotAvatar';
-import { getMetroBotResponse } from '../utils/metroBotEngine';
+import { 
+  getMetroBotResponse, 
+  getInitialBotGreeting, 
+  KNOWLEDGE_BASE, 
+  isRouteOrMapQuery, 
+  isEmploymentQuery 
+} from '../utils/metroBotEngine';
 import { DEFAULT_16_STATIONS } from './InteractiveMap';
+import { sanitizeChatMessage, detectSqlInjection } from '../utils/securitySanitizer';
 
 // === CHIPS DINÁMICOS CONTEXTUALES POR CATEGORÍA ===
 const DYNAMIC_CHIPS = {
   es: [
+    { id: 'c_empleo', label: '💼 Convocatorias de Empleo', category: 'empleo', prompt: '💼 ¿Cuáles son las convocatorias de empleo y vacantes del Metro de Bogotá?' },
+    { id: 'c_cultura', label: '🌱 Cultura #BogotáModoMetro', category: 'cultura', prompt: '🌱 ¿Cuáles son las normas de cultura ciudadana y #BogotáModoMetro?' },
     { id: 'c0a', label: '📍 Multiplaza y conexiones', category: 'rutas', prompt: '📍 ¿Qué estaciones quedan cerca de Multiplaza?' },
     { id: 'c0b', label: '🗺️ De Fontibón a Centro Mayor', category: 'rutas', prompt: '🗺️ ¿Cómo llego desde Fontibón a Centro Mayor?' },
-    { id: 'c0c', label: '📰 Noticias de la obra', category: 'noticias', prompt: '📰 ¿Cuáles son las últimas noticias del metro y obras?' },
+    { id: 'c0d', label: '🚇 Las 16 Estaciones (PLMB)', category: 'estaciones', prompt: '🚇 ¿Cuáles son las 16 estaciones de la Primera Línea del Metro?' },
+    { id: 'c3', label: '💳 Tarjeta TuLlave y Tarifas', category: 'tarifas', prompt: '💳 ¿Cómo personalizar la tarjeta TuLlave, tarifas vigentes y subsidios?' },
+    { id: 'c10', label: '🚧 Estado de obra (82.33%)', category: 'obras', prompt: '🚧 ¿Cuál es el estado de avance de la obra (82.33%)?' },
+    { id: 'c_noticias', label: '📰 Noticias Oficiales', category: 'noticias', prompt: '📰 ¿Cuáles son las últimas noticias del Metro de Bogotá?' },
     { id: 'c1', label: '📍 Estaciones en Kennedy', category: 'estaciones', prompt: '📍 ¿Cuáles estaciones me quedan cerca de Kennedy?' },
     { id: 'c2', label: '👥 Aforo de personas', category: 'capacidad', prompt: '👥 ¿Cuál es el aforo y capacidad de personas?' },
-    { id: 'c3', label: '💳 ¿Cómo recargar?', category: 'tarifas', prompt: '💳 ¿Cuál es la tarifa y cómo recargar TuTarjetaMetro?' },
-    { id: 'c4', label: '💼 Vacantes sin experiencia', category: 'empleo', prompt: '💼 ¿Hay vacantes de empleo sin experiencia?' },
-    { id: 'c5', label: '📍 ¿Dónde queda el Patio Taller?', category: 'estaciones', prompt: '📍 ¿Dónde queda el Patio Taller?' },
-    { id: 'c6', label: '⚡ Velocidad del tren', category: 'trenes', prompt: '⚡ ¿A qué velocidad irá el tren?' },
-    { id: 'c7', label: '⏱️ Tiempo Bosa a Calle 72', category: 'tiempo', prompt: '⏱️ ¿Cuánto tiempo tomará ir desde Kennedy al Centro?' },
-    { id: 'c8', label: '🔄 Trasbordos TransMilenio', category: 'conexiones', prompt: '🔄 ¿Dónde puedo hacer trasbordo con TransMilenio?' },
-    { id: 'c9', label: '🚇 Línea 2 a Suba', category: 'proyectos', prompt: '🚇 ¿Cómo será la Segunda Línea del Metro a Suba?' },
-    { id: 'c10', label: '🚧 Estado de obra (82.33%)', category: 'obras', prompt: '🚧 ¿Cuál es el estado de avance de la obra (82.33%)?' }
+    { id: 'c7', label: '⏱️ Tiempo Bosa a Calle 72', category: 'tiempo', prompt: '⏱️ ¿Cuánto tiempo tomará ir desde Bosa o Kennedy al Centro?' },
+    { id: 'c9', label: '🚇 Línea 2 a Suba', category: 'proyectos', prompt: '🚇 ¿Cómo será la Segunda Línea del Metro a Suba?' }
   ],
   en: [
     { id: 'c0a', label: '📍 Multiplaza connections', category: 'routes', prompt: '📍 Which stations are near Multiplaza?' },
     { id: 'c0b', label: '🗺️ Fontibón to Centro Mayor', category: 'routes', prompt: '🗺️ How do I get from Fontibón to Centro Mayor?' },
-    { id: 'c0c', label: '📰 Metro construction news', category: 'news', prompt: '📰 What are the latest news and progress on Bogotá Metro?' },
+    { id: 'c0d', label: '🚇 All 16 Metro Stations', category: 'stations', prompt: '🚇 What are the 16 stations of Bogotá Metro Line 1?' },
+    { id: 'c3', label: '💳 TuLlave Card & Fares', category: 'fares', prompt: '💳 How do fares, TuLlave card, and $0 transfers work?' },
+    { id: 'c4', label: '💼 Jobs at SENA & Metro', category: 'jobs', prompt: '💼 How can I apply for job openings at SENA and Metro Línea 1?' },
     { id: 'c1', label: '📍 Stations in Kennedy', category: 'stations', prompt: '📍 Which stations are located in Kennedy?' },
+    { id: 'c10', label: '🚧 Progress (82.33%)', category: 'progress', prompt: '🚧 What is the official construction progress (82.33%)?' },
     { id: 'c2', label: '👥 Passenger Capacity', category: 'capacity', prompt: '👥 What is the passenger capacity and volume?' },
-    { id: 'c3', label: '💳 How to recharge card?', category: 'fares', prompt: '💳 How do fares and TuTarjetaMetro recharge work?' },
-    { id: 'c4', label: '💼 Jobs with no experience', category: 'jobs', prompt: '💼 Are there job openings for candidates with no experience?' },
     { id: 'c5', label: '📍 Where is the Patio Taller?', category: 'stations', prompt: '📍 Where is the Patio Taller located?' },
-    { id: 'c6', label: '⚡ Train speed', category: 'trains', prompt: '⚡ What is the commercial speed of the trains?' },
-    { id: 'c7', label: '⏱️ Travel time Kennedy to Downtown', category: 'time', prompt: '⏱️ Travel time from Kennedy to Downtown?' },
     { id: 'c8', label: '🔄 TransMilenio transfers', category: 'transfers', prompt: '🔄 Where can I transfer to TransMilenio?' }
   ],
   pt: [
@@ -59,15 +62,15 @@ const DYNAMIC_CHIPS = {
     { id: 'c1', label: '📍 Estações em Kennedy', category: 'estacoes', prompt: '📍 Quais estações ficam em Kennedy?' },
     { id: 'c2', label: '👥 Lotação de passageiros', category: 'capacidade', prompt: '👥 Qual é a capacidade e lotação de passageiros?' },
     { id: 'c3', label: '💳 Como recarregar?', category: 'tarifas', prompt: '💳 Qual é a tarifa e como recarregar o cartão?' },
-    { id: 'c4', label: '💼 Vagas de emprego', category: 'emprego', prompt: '💼 Quais vagas de emprego estão abertas?' },
-    { id: 'c5', label: '📍 Onde fica o Pátio Taller?', category: 'estacoes', prompt: '📍 Onde fica o Pátio Taller?' },
-    { id: 'c6', label: '⏱️ Tempo Kennedy ao Centro', category: 'tempo', prompt: '⏱️ Quanto tempo leva de Kennedy ao Centro?' },
-    { id: 'c7', label: '🔄 Baldeações TransMilenio', category: 'conexoes', prompt: '🔄 Onde posso fazer baldeação com TransMilenio?' }
+    { id: 'c4', label: '💼 Vagas de emprego', category: 'jobs', prompt: '💼 Como se candidatar às vagas do SENA e Metro?' },
+    { id: 'c5', label: '📍 Onde fica o pátio?', category: 'estacoes', prompt: '📍 Onde fica o Pátio Oficina (Patio Taller)?' },
+    { id: 'c7', label: '⏱️ Tempo de viagem', category: 'tempo', prompt: '⏱️ Quanto tempo leva de Bosa até a Calle 72?' },
+    { id: 'c8', label: '🔄 Integração de transporte', category: 'transfers', prompt: '🔄 Onde fazer baldeação com o TransMilenio?' }
   ],
   zh: [
-    { id: 'c0a', label: '📍 Multiplaza 换乘路线', category: 'routes', prompt: '📍 Multiplaza 购物中心附近有哪些地铁站？' },
-    { id: 'c0b', label: '🗺️ 从芳蒂邦到中央购物中心', category: 'routes', prompt: '🗺️ 从丰蒂邦 (Fontibón) 如何前往 Centro Mayor？' },
-    { id: 'c0c', label: '📰 最新工程与建设动态', category: 'news', prompt: '📰 地铁工程最新官方动态与到货进展是什么？' },
+    { id: 'c0a', label: '📍 Multiplaza 换乘', category: 'routes', prompt: '📍 Multiplaza 附近有哪些地铁站？' },
+    { id: 'c0b', label: '🗺️ 丰蒂邦到 Centro Mayor', category: 'routes', prompt: '🗺️ 从丰蒂邦如何前往 Centro Mayor？' },
+    { id: 'c0c', label: '📰 地铁工程最新消息', category: 'news', prompt: '📰 波哥大地铁一号线工程进展如何？' },
     { id: 'c1', label: '📍 肯尼迪区车站', category: 'stations', prompt: '📍 肯尼迪区 (Kennedy) 有哪些车站？' },
     { id: 'c2', label: '👥 列车额定载客量', category: 'capacity', prompt: '👥 地铁列车与车站的额定载客量是多少？' },
     { id: 'c3', label: '💳 票价与充值指南', category: 'fares', prompt: '💳 地铁票价是多少以及如何支付充值？' },
@@ -75,110 +78,7 @@ const DYNAMIC_CHIPS = {
     { id: 'c5', label: '📍 车场建在哪里？', category: 'stations', prompt: '📍 车场 (Patio Taller) 建在哪里？' },
     { id: 'c6', label: '⏱️ 全程耗时测算', category: 'time', prompt: '⏱️ 从肯尼迪到市中心需要多久？' },
     { id: 'c7', label: '🔄 快速公交换乘', category: 'transfers', prompt: '🔄 哪里可以换乘快速公交 TransMilenio？' }
-  ],
-  ja: [
-    { id: 'c0a', label: '📍 マルティプラザ乗換', category: 'routes', prompt: '📍 マルティプラザ (Multiplaza) の最寄駅はどこ？' },
-    { id: 'c0b', label: '🗺️ フォンティボンからセントロ・マヨールへ', category: 'routes', prompt: '🗺️ フォンティボンからセントロ・マヨールへの行き方は？' },
-    { id: 'c0c', label: '📰 地下鉄最新ニュース', category: 'news', prompt: '📰 ボゴタ地下鉄の最新ニュースと進捗状況は？' },
-    { id: 'c1', label: '📍 ケネディ区の駅', category: 'stations', prompt: '📍 ケネディ区の駅はどこ？' },
-    { id: 'c2', label: '👥 定員と輸送能力', category: 'capacity', prompt: '👥 列車の定員と輸送能力はどのくらい？' },
-    { id: 'c3', label: '💳 運賃とチャージ', category: 'fares', prompt: '💳 運賃体系と支払い方法は？' },
-    { id: 'c4', label: '💼 採用情報と求人', category: 'jobs', prompt: '💼 未経験から応募できる求人はありますか？' },
-    { id: 'c5', label: '📍 車両基地の場所', category: 'stations', prompt: '📍 車両基地 (Patio Taller) はどこにある？' },
-    { id: 'c6', label: '⏱️ 所要時間の確認', category: 'time', prompt: '⏱️ ケネディから中心街までの所要時間は？' },
-    { id: 'c7', label: '🔄 トランスミレニオ乗換', category: 'transfers', prompt: '🔄 トランスミレニオとの乗換駅は？' }
   ]
-};
-
-// Mensaje de bienvenida inicial multilingüe
-const getInitialBotMessage = (language) => {
-  const l = (language || 'es').toLowerCase();
-  if (l === 'ja') {
-    return `こんにちは！私は **MetroBot IA** 🤖、ボゴタ地下鉄1号線（PLMB）および **UrbanGo** の公式都市モビリティ・AIアシスタントです。\n\n市内20区すべての移動ルート、ショッピングモール（Multiplaza、Centro Mayorなど）、公園、大学、最新ニュース、工事進捗（82.33%）、定員・輸送能力について何でもお尋ねください。\n\n[SUGERENCIAS]\n- 📍 マルティプラザの最寄駅はどこ？\n- 🗺️ フォンティボンからセントロ・マヨールへの行き方は？\n- 👥 列車の定員と輸送能力はどのくらい？\n- 📰 地下鉄最新ニュース`;
-  }
-  if (l === 'zh') {
-    return `您好！我是 **MetroBot IA** 🤖，波哥大地铁一号线（PLMB）及 **UrbanGo** 官方全域交通与城市出行AI智能助手。\n\n您可以向我咨询波哥安全市20个行政区的所有换乘出行方案、各大商场（Multiplaza、Centro Mayor等）、公园、大学高校、最新工程进展（82.33%）、列车载客量与招聘机会。\n\n[SUGERENCIAS]\n- 📍 Multiplaza 购物中心附近有哪些地铁站？\n- 🗺️ 从丰蒂邦如何前往 Centro Mayor？\n- 👥 地铁列车与车站的额定载客量是多少？\n- 📰 地铁工程最新官方动态是什么？`;
-  }
-  if (l === 'pt') {
-    return `Olá! Sou o **MetroBot IA** 🤖, o assistente inteligente oficial de mobilidade e geografia urbana de Bogotá no UrbanGo e Metro de Bogotá.\n\nVocê pode me perguntar sobre qualquer ponto da cidade, as 20 localidades, shoppings (Multiplaza, Centro Mayor, etc.), parques, universidades, rotas passo a passo, notícias, avanço de obra (82.33%) e capacidade.\n\n[SUGERENCIAS]\n- 📍 Quais estações ficam perto de Multiplaza?\n- 🗺️ Como chegar de Fontibón a Centro Mayor?\n- 👥 Qual é a capacidade e lotação de passageiros?\n- 📰 Quais são as últimas notícias das obras?`;
-  }
-  if (l === 'en') {
-    return `Hello! I am **MetroBot AI** 🤖, the official intelligent mobility and urban geography assistant for Bogotá at UrbanGo and Bogotá Metro.\n\nYou can ask me about any of Bogotá's 20 localities, shopping malls (Multiplaza, Centro Mayor, Unicentro), parks, universities, step-by-step transit routes, official news, construction progress (82.33%), and passenger capacity.\n\n[SUGERENCIAS]\n- 📍 Which stations are near Multiplaza?\n- 🗺️ How do I get from Fontibón to Centro Mayor?\n- 👥 What is the passenger capacity and volume?\n- 📰 What are the latest construction news?`;
-  }
-  return `¡Hola! Soy **MetroBot IA** 🤖, tu asistente inteligente oficial de movilidad y geografía urbana de Bogotá en UrbanGo y la Empresa Metro de Bogotá (EMB).\n\nConozco toda la ciudad: sus 20 localidades, centros comerciales (Multiplaza, Centro Mayor, Unicentro, Titán Plaza), parques, universidades, barrios, rutas paso a paso (SITP / TransMilenio / Metro), noticias, obras al 82.33% y aforo de personas. ¡Pregúntame lo que necesites!\n\n[SUGERENCIAS]\n- 📍 ¿Qué estaciones quedan cerca de Multiplaza?\n- 🗺️ ¿Cómo llego desde Fontibón a Centro Mayor?\n- 👥 ¿Cuál es el aforo y capacidad de personas?\n- 📰 ¿Cuáles son las últimas noticias del metro y obras?`;
-};
-
-// Metadata para tarjetas de acción
-const getActionCardMeta = (actionId, label, dark) => {
-  const cleanId = (actionId || '').replace(/^#/, '');
-
-  if (cleanId === 'action_map' || cleanId === 'nav_mapa') {
-    return {
-      icon: <Compass size={16} className="text-[#06B6D4] shrink-0" />,
-      badge: 'Navegación L1',
-      title: 'Mapa Interactivo de Estaciones',
-      desc: 'Explora las 16 estaciones, viaducto y trazado en tiempo real.',
-      btnText: 'Ver en el Mapa',
-      theme: dark 
-        ? 'bg-zinc-900 border-cyan-500/40 hover:border-cyan-400 text-zinc-100' 
-        : 'bg-white border-cyan-300 hover:border-cyan-500 text-zinc-900',
-      badgeClass: 'bg-cyan-500/10 text-cyan-400'
-    };
-  }
-
-  if (cleanId === 'action_recharge' || cleanId === 'open_saldo' || cleanId === 'tullave') {
-    return {
-      icon: <CreditCard size={16} className="text-[#10B981] shrink-0" />,
-      badge: 'Tarjeta Inteligente',
-      title: 'Recargar TuTarjetaMetro',
-      desc: 'Gestiona tu saldo virtual, PSE, Nequi y Daviplata.',
-      btnText: 'Recargar Saldo',
-      theme: dark 
-        ? 'bg-zinc-900 border-emerald-500/40 hover:border-emerald-400 text-zinc-100' 
-        : 'bg-white border-emerald-300 hover:border-emerald-500 text-zinc-900',
-      badgeClass: 'bg-emerald-500/10 text-emerald-400'
-    };
-  }
-
-  if (cleanId === 'open_portal_empleo' || cleanId.startsWith('job')) {
-    return {
-      icon: <Briefcase size={16} className="text-[#8B5CF6] shrink-0" />,
-      badge: 'Convocatoria Laboral',
-      title: 'Bolsa de Empleo Oficial Metro',
-      desc: 'Más de 180 vacantes abiertas para obras, ingeniería y operación.',
-      btnText: 'Ver Vacantes',
-      theme: dark 
-        ? 'bg-zinc-900 border-purple-500/40 hover:border-purple-400 text-zinc-100' 
-        : 'bg-white border-purple-300 hover:border-purple-500 text-zinc-900',
-      badgeClass: 'bg-purple-500/10 text-purple-400'
-    };
-  }
-
-  if (cleanId === 'open_project_status' || cleanId === 'action_status') {
-    return {
-      icon: <TrendingUp size={16} className="text-[#F59E0B] shrink-0" />,
-      badge: 'Auditoría EMB',
-      title: 'Avance de Obra en Vivo (82.33%)',
-      desc: 'Inspecciona frentes de trabajo, viaducto, patio taller y Calle 72.',
-      btnText: 'Ver Estado de Obra',
-      theme: dark 
-        ? 'bg-zinc-900 border-amber-500/40 hover:border-amber-400 text-zinc-100' 
-        : 'bg-white border-amber-300 hover:border-amber-500 text-zinc-900',
-      badgeClass: 'bg-amber-500/10 text-amber-400'
-    };
-  }
-
-  return {
-    icon: <ArrowRight size={16} className="text-[#DC2626] shrink-0" />,
-    badge: 'Acción Rápida',
-    title: label || 'Abrir Sección',
-    desc: 'Acceso directo desde MetroBot IA.',
-    btnText: label || 'Continuar',
-    theme: dark 
-      ? 'bg-zinc-900 border-zinc-700 hover:border-[#DC2626] text-zinc-200' 
-      : 'bg-white border-zinc-200 hover:border-[#DC2626] text-zinc-900',
-    badgeClass: 'bg-[#DC2626]/10 text-[#DC2626]'
-  };
 };
 
 /**
@@ -226,163 +126,384 @@ const detectStationMention = (text) => {
 };
 
 /**
- * Renderizador de Texto Markdown con Botón de Acción Mapa-Chat integrado
+ * Helper para renderizar negritas y formato inline de forma limpia y accesible.
+ * Procesa automáticamente saltos de línea (\n) y marcado en negrita (**texto**).
+ * Garantiza contraste perfecto y color nítido tanto en modo claro como oscuro.
  */
-const RenderBotText = ({ 
-  text, 
-  dark, 
-  onAction, 
-  onAsk, 
-  onFocusStation,
-  t
-}) => {
-  const parts = (text || '').split('[SUGERENCIAS]');
-  const mainContent = parts[0] || '';
-  const suggestionsContent = parts.length > 1 ? parts[1] : null;
+const renderInlineFormatted = (str, isDark = false) => {
+  if (!str) return null;
+  const lines = String(str).split(/\r?\n/);
+  return lines.map((line, lineIdx) => {
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+    return (
+      <Fragment key={lineIdx}>
+        {lineIdx > 0 && <br />}
+        {parts.map((part, idx) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+            return (
+              <strong 
+                key={idx} 
+                className={isDark ? 'font-black text-white' : 'font-black text-zinc-950'}
+              >
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return (
+            <span 
+              key={idx} 
+              className={isDark ? 'text-zinc-200' : 'text-zinc-800'}
+            >
+              {part}
+            </span>
+          );
+        })}
+      </Fragment>
+    );
+  });
+};
 
-  // Detección de estación para botón de acción directa mapa-chat
-  const mentionedStation = useMemo(() => detectStationMention(mainContent), [mainContent]);
+/**
+ * Renderizador de Texto Limpio de MetroBot IA.
+ * Imprime ÚNICAMENTE texto limpio en el chat (markdown con negritas, listas y saltos de línea),
+ * SIN incrustar Cards de interfaz estáticas, ni botones repetitivos de mapa ni bloques de sugerencias dentro del mensaje.
+ */
+const RenderBotText = ({ text, dark, onAction }) => {
+  // Separar y aislar la respuesta de texto de cualquier bloque [SUGERENCIAS]
+  const cleanBody = useMemo(() => {
+    if (!text) return '';
+    // Quitar bloque de [SUGERENCIAS]
+    let cleaned = text.split('[SUGERENCIAS]')[0];
+    // Quitar todos los tags de acción dinámicos [ACTION: ...]
+    cleaned = cleaned.replace(/\[ACTION:\s*[A-Z0-9_]+\]/g, '');
+    // Quitar enlaces markdown tipo [Texto](#action)
+    cleaned = cleaned.replace(/\[(?:🗺️|💳|🚧|📰|📍)?\s*[^\]]+\]\(#[a-zA-Z0-9_-]+\)/g, '');
+    return cleaned.trim();
+  }, [text]);
 
-  const lines = mainContent.split('\n');
+  // Extracción estricta del comando [ACTION: ...] mediante Regex del mensaje del bot
+  const actionMatch = text ? text.match(/\[ACTION:\s*([A-Z0-9_]+)\]/i) : null;
+  const detectedAction = actionMatch ? actionMatch[1].toUpperCase() : null;
+
+  // Detección estricta de intenciones y comandos de acción ([ACTION])
+  // REGLA CRÍTICA 1: Si el mensaje contiene formato de ruta, direcciones o mapa,
+  // queda PROHIBIDO adjuntar [ACTION: OPEN_EMPLOYMENT_MODULE] aunque mencione Bosa, Kennedy, Usme o Fontibón.
+  const isRouteContent = 
+    isRouteOrMapQuery('', text) || 
+    detectedAction === 'OPEN_MAP_MODULE' ||
+    text.includes('🧭 **Ruta Sugerida:') ||
+    text.includes('🧭 **Ruta:') || 
+    text.includes('• **Estación de Metro clave') ||
+    text.includes('• **Estación Metro Clave') ||
+    text.includes('🔄 **Conexiones Totales:');
+
+  const hasMapAction = isRouteContent || detectedAction === 'OPEN_MAP_MODULE';
+  const hasEmploymentAction = !isRouteContent && detectedAction === 'OPEN_EMPLOYMENT_MODULE';
+  const hasNewsAction = !isRouteContent && detectedAction === 'OPEN_NEWS_MODULE';
+  const hasBalanceAction = !isRouteContent && detectedAction === 'OPEN_BALANCE_MODULE';
+  const hasCultureAction = !isRouteContent && detectedAction === 'OPEN_CULTURE_MODULE';
+  const hasForumAction = !isRouteContent && detectedAction === 'OPEN_FORUM_MODULE';
+
+  // Procesar párrafos y líneas
+  const paragraphs = useMemo(() => {
+    if (!cleanBody) return [];
+    return cleanBody
+      .replace(/\[ACTION:\s*[A-Z0-9_]+\]/g, '')
+      .split(/\n\s*\n/)
+      .map(p => p.trim())
+      .filter(Boolean);
+  }, [cleanBody]);
 
   return (
-    <div className="space-y-1.5">
-      {lines.map((line, i) => {
-        if (!line.trim()) return <div key={i} className="h-1" />;
+    <div className="space-y-3 py-0.5 text-xs sm:text-[13px] leading-relaxed">
+      {paragraphs.map((para, pIdx) => {
+        const lines = para.split('\n').map(l => l.trim()).filter(Boolean);
 
-        // Botón de acción interactivo Markdown: [LABEL](#ACTION_ID)
-        const actionMatch = line.match(/\[(.*?)\]\((#.*?)\)/);
-        if (actionMatch) {
-          const label = actionMatch[1];
-          const target = actionMatch[2];
-          const meta = getActionCardMeta(target, label, dark);
+        return (
+          <div key={pIdx} className="space-y-1.5">
+            {lines.map((line, lIdx) => {
+              // Comprobar si es un paso numerado: ej. "1. **Abordaje 1 (Origen):** ..." o "1. Paso 1..."
+              const isNumberedStep = /^[0-9]+\.\s+/.test(line);
+              // Comprobar si es un bullet: ej. "• ..." o "- ..."
+              const isBullet = /^[-*•]\s+/.test(line);
 
-          return (
-            <div key={i} className="my-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (target === '#action_map' && mentionedStation && onFocusStation) {
-                    onFocusStation(mentionedStation);
-                  } else if (onAction) {
-                    onAction(target, label);
-                  }
-                }}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] group flex flex-col gap-2 ${meta.theme}`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {meta.icon}
-                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${meta.badgeClass}`}>
-                      {meta.badge}
+              if (isNumberedStep) {
+                const match = line.match(/^([0-9]+\.)\s+(.*)/);
+                const stepNum = match ? match[1] : '';
+                const stepText = match ? match[2] : line;
+                return (
+                  <div key={lIdx} className="flex items-start gap-2 pl-0.5 my-1.5">
+                    <span className="font-bold text-[#DC2626] dark:text-red-400 shrink-0">
+                      {stepNum}
                     </span>
+                    <div className="flex-1">
+                      {renderInlineFormatted(stepText, dark)}
+                    </div>
                   </div>
-                  <ArrowRight size={14} className="shrink-0 group-hover:translate-x-1 transition-transform opacity-70 group-hover:opacity-100" />
-                </div>
-                <div>
-                  <h4 className="font-black text-xs sm:text-sm tracking-tight leading-snug">
-                    {meta.title}
-                  </h4>
-                  <p className="text-[11px] font-medium opacity-80 mt-0.5 leading-tight">
-                    {meta.desc}
-                  </p>
-                </div>
-                <div className="pt-1 flex items-center justify-end">
-                  <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white flex items-center gap-1.5 shadow-sm transition-colors">
-                    <span>{meta.btnText}</span>
-                    <ArrowRight size={12} />
-                  </span>
-                </div>
-              </button>
-            </div>
-          );
-        }
+                );
+              }
 
-        const isBullet = line.trim().startsWith('- ');
-        let rendered = line
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em>$1</em>');
+              if (isBullet) {
+                const bulletText = line.replace(/^[-*•]\s+/, '');
+                return (
+                  <div key={lIdx} className="flex items-start gap-2 pl-1 my-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626] dark:bg-red-400 mt-2 shrink-0" />
+                    <div className="flex-1">
+                      {renderInlineFormatted(bulletText, dark)}
+                    </div>
+                  </div>
+                );
+              }
 
-        if (isBullet) {
-          return (
-            <div key={i} className="flex items-start gap-2 ml-1">
-              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#DC2626] flex-shrink-0" />
-              <span dangerouslySetInnerHTML={{ __html: rendered.replace(/^- /, '') }} />
-            </div>
-          );
-        }
-
-        return <p key={i} dangerouslySetInnerHTML={{ __html: rendered }} />;
+              return (
+                <div key={lIdx} className="leading-relaxed">
+                  {renderInlineFormatted(line, dark)}
+                </div>
+              );
+            })}
+          </div>
+        );
       })}
 
-      {/* ── BOTÓN DINÁMICO MAPA-CHAT (MICRO-INNOVACIÓN 2) ── */}
-      {mentionedStation && onFocusStation && (
-        <div className="pt-2 pb-1">
+      {/* ── ACTION TRIGGER CARDS DINÁMICAS (Diseño Oficial Rojo Oscuro y Crema) ── */}
+
+      {/* 1. CONSULTAS DE RUTAS, DIRECCIONES Y UBICACIÓN DE ESTACIONES */}
+      {hasMapAction && (
+        <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <button
             type="button"
-            onClick={() => onFocusStation(mentionedStation)}
-            className="btn-map-focus w-full py-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-[#06B6D4]/15 to-[#3B82F6]/15 hover:from-[#06B6D4]/25 hover:to-[#3B82F6]/25 border border-cyan-500/40 text-cyan-500 dark:text-cyan-400 font-black text-xs uppercase tracking-wider shadow-sm flex items-center justify-between gap-2 active:scale-95 transition-all group"
+            onClick={() => {
+              if (onAction) onAction('#open_mapa', 'Ver esta ruta en el Mapa Interactivo');
+            }}
+            className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 shadow-sm active:scale-[0.98] group flex items-center justify-between gap-3 ${
+              dark 
+                ? 'bg-gradient-to-r from-[#2c0505]/95 via-[#1a0303] to-[#120202] border-red-700/60 hover:border-red-500 text-amber-100 shadow-red-950/20' 
+                : 'bg-gradient-to-r from-[#FFFDF9] via-[#FFF8EE] to-[#FEF3C7] border-2 border-[#991b1b]/35 hover:border-[#991b1b] text-[#7f1d1d] shadow-sm'
+            }`}
           >
-            <span className="flex items-center gap-2 truncate">
-              <Compass size={15} className="text-cyan-500 group-hover:rotate-45 transition-transform shrink-0" />
-              <span className="truncate">🗺️ {(t ? t('mapModule.btnFocusMap', 'Enfocar en el Mapa') : 'Enfocar en el Mapa')}: {mentionedStation.name}</span>
-            </span>
-            <ArrowRight size={14} className="shrink-0 group-hover:translate-x-1 transition-transform" />
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                dark ? 'bg-gradient-to-br from-[#DC2626] to-[#7f1d1d] text-amber-100' : 'bg-gradient-to-br from-[#991b1b] to-[#7f1d1d] text-amber-50'
+              }`}>
+                <MapIcon size={16} />
+              </div>
+              <div className="truncate">
+                <span className={`text-[9.5px] font-black uppercase tracking-wider block leading-none mb-1 ${
+                  dark ? 'text-amber-300/90' : 'text-[#991b1b]'
+                }`}>
+                  Trazado Línea 1 · 16 Estaciones y Viaducto
+                </span>
+                <span className={`font-bold text-xs truncate block ${
+                  dark ? 'text-amber-50 group-hover:text-white' : 'text-[#7f1d1d]'
+                }`}>
+                  🗺️ Ver esta ruta en el Mapa Interactivo
+                </span>
+              </div>
+            </div>
+            <ArrowRight size={15} className={`shrink-0 group-hover:translate-x-1.5 transition-transform ${
+              dark ? 'text-amber-300' : 'text-[#991b1b]'
+            }`} />
           </button>
         </div>
       )}
 
-      {/* Bloque interactivo de [SUGERENCIAS] */}
-      {suggestionsContent && (
-        <div className="mt-3 pt-3 border-t border-dashed border-zinc-200 dark:border-zinc-800">
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-[10px] font-black tracking-widest uppercase text-zinc-500 dark:text-zinc-400">
-              [SUGERENCIAS]
-            </span>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            {suggestionsContent
-              .split('\n')
-              .map(s => s.trim())
-              .filter(s => s.startsWith('- '))
-              .map((item, idx) => {
-                const itemClean = item.replace(/^- /, '').trim();
-                const actionMatch = itemClean.match(/\[(.*?)\]\((#.*?)\)/);
+      {/* 2. CONSULTAS EXCLUSIVAS DE TRABAJO, VACANTES Y SENA */}
+      {hasEmploymentAction && (
+        <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button
+            type="button"
+            onClick={() => {
+              if (onAction) onAction('#open_portal_empleo', 'Ver Convocatorias de Empleo');
+            }}
+            className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 shadow-sm active:scale-[0.98] group flex items-center justify-between gap-3 ${
+              dark 
+                ? 'bg-gradient-to-r from-[#2c0505]/95 via-[#1a0303] to-[#120202] border-red-700/60 hover:border-red-500 text-amber-100 shadow-red-950/20' 
+                : 'bg-gradient-to-r from-[#FFFDF9] via-[#FFF8EE] to-[#FEF3C7] border-2 border-[#991b1b]/35 hover:border-[#991b1b] text-[#7f1d1d] shadow-sm'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                dark ? 'bg-gradient-to-br from-[#DC2626] to-[#7f1d1d] text-amber-100' : 'bg-gradient-to-br from-[#991b1b] to-[#7f1d1d] text-amber-50'
+              }`}>
+                <Briefcase size={16} />
+              </div>
+              <div className="truncate">
+                <span className={`text-[9.5px] font-black uppercase tracking-wider block leading-none mb-1 ${
+                  dark ? 'text-amber-300/90' : 'text-[#991b1b]'
+                }`}>
+                  Agencia Pública SENA / EMB · Postulaciones Gratuitas
+                </span>
+                <span className={`font-bold text-xs truncate block ${
+                  dark ? 'text-amber-50 group-hover:text-white' : 'text-[#7f1d1d]'
+                }`}>
+                  💼 Ver Convocatorias de Empleo
+                </span>
+              </div>
+            </div>
+            <ArrowRight size={15} className={`shrink-0 group-hover:translate-x-1.5 transition-transform ${
+              dark ? 'text-amber-300' : 'text-[#991b1b]'
+            }`} />
+          </button>
+        </div>
+      )}
 
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      if (actionMatch && onAction) {
-                        onAction(actionMatch[2], actionMatch[1]);
-                      } else if (itemClean.includes('Mapa Interactivo') && onAction) {
-                        if (mentionedStation && onFocusStation) {
-                          onFocusStation(mentionedStation);
-                        } else {
-                          onAction('#action_map', itemClean);
-                        }
-                      } else if (itemClean.includes('TuTarjetaMetro') && onAction) {
-                        onAction('#action_recharge', itemClean);
-                      } else if (onAsk) {
-                        onAsk(itemClean);
-                      }
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between gap-2 border transition-all duration-150 active:scale-[0.98] ${
-                      dark
-                        ? 'bg-zinc-800/80 hover:bg-zinc-800 border-zinc-700/70 text-zinc-200 hover:border-zinc-600'
-                        : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-800 hover:border-zinc-300'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="text-[#DC2626] font-black text-xs">•</span>
-                      <span>{itemClean.replace(/\[(.*?)\]\(#.*?\)/, '$1')}</span>
-                    </span>
-                    <ArrowRight size={13} className="shrink-0 text-zinc-400" />
-                  </button>
-                );
-              })}
-          </div>
+      {/* 3. CONSULTAS DE NOTICIAS, HITOS Y PORCENTAJE DE AVANCE DE OBRA */}
+      {hasNewsAction && (
+        <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button
+            type="button"
+            onClick={() => {
+              if (onAction) onAction('#open_noticias', 'Ver Noticias e Hitos de la Obra');
+            }}
+            className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 shadow-sm active:scale-[0.98] group flex items-center justify-between gap-3 ${
+              dark 
+                ? 'bg-gradient-to-r from-[#2c0505]/95 via-[#1a0303] to-[#120202] border-red-700/60 hover:border-red-500 text-amber-100 shadow-red-950/20' 
+                : 'bg-gradient-to-r from-[#FFFDF9] via-[#FFF8EE] to-[#FEF3C7] border-2 border-[#991b1b]/35 hover:border-[#991b1b] text-[#7f1d1d] shadow-sm'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                dark ? 'bg-gradient-to-br from-[#DC2626] to-[#7f1d1d] text-amber-100' : 'bg-gradient-to-br from-[#991b1b] to-[#7f1d1d] text-amber-50'
+              }`}>
+                <Newspaper size={16} />
+              </div>
+              <div className="truncate">
+                <span className={`text-[9.5px] font-black uppercase tracking-wider block leading-none mb-1 ${
+                  dark ? 'text-amber-300/90' : 'text-[#991b1b]'
+                }`}>
+                  Boletines Oficiales y Avance de Obra (82,33%)
+                </span>
+                <span className={`font-bold text-xs truncate block ${
+                  dark ? 'text-amber-50 group-hover:text-white' : 'text-[#7f1d1d]'
+                }`}>
+                  📰 Ver Noticias e Hitos de la Obra
+                </span>
+              </div>
+            </div>
+            <ArrowRight size={15} className={`shrink-0 group-hover:translate-x-1.5 transition-transform ${
+              dark ? 'text-amber-300' : 'text-[#991b1b]'
+            }`} />
+          </button>
+        </div>
+      )}
+
+      {/* 4. CONSULTAS DE SALDO, RECARGAS Y TARJETA TULLAVE */}
+      {hasBalanceAction && (
+        <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button
+            type="button"
+            onClick={() => {
+              if (onAction) onAction('#open_saldo', 'Consultar Saldo y Recargar TuLlave');
+            }}
+            className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 shadow-sm active:scale-[0.98] group flex items-center justify-between gap-3 ${
+              dark 
+                ? 'bg-gradient-to-r from-[#2c0505]/95 via-[#1a0303] to-[#120202] border-red-700/60 hover:border-red-500 text-amber-100 shadow-red-950/20' 
+                : 'bg-gradient-to-r from-[#FFFDF9] via-[#FFF8EE] to-[#FEF3C7] border-2 border-[#991b1b]/35 hover:border-[#991b1b] text-[#7f1d1d] shadow-sm'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                dark ? 'bg-gradient-to-br from-[#DC2626] to-[#7f1d1d] text-amber-100' : 'bg-gradient-to-br from-[#991b1b] to-[#7f1d1d] text-amber-50'
+              }`}>
+                <CreditCard size={16} />
+              </div>
+              <div className="truncate">
+                <span className={`text-[9.5px] font-black uppercase tracking-wider block leading-none mb-1 ${
+                  dark ? 'text-amber-300/90' : 'text-[#991b1b]'
+                }`}>
+                  Sistema TuLlave · Transbordo a $0 COP en 110 min
+                </span>
+                <span className={`font-bold text-xs truncate block ${
+                  dark ? 'text-amber-50 group-hover:text-white' : 'text-[#7f1d1d]'
+                }`}>
+                  💳 Consultar Saldo y Recargar TuLlave
+                </span>
+              </div>
+            </div>
+            <ArrowRight size={15} className={`shrink-0 group-hover:translate-x-1.5 transition-transform ${
+              dark ? 'text-amber-300' : 'text-[#991b1b]'
+            }`} />
+          </button>
+        </div>
+      )}
+
+      {/* 5. CONSULTAS DE CULTURA Y PEDAGOGÍA */}
+      {hasCultureAction && (
+        <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button
+            type="button"
+            onClick={() => {
+              if (onAction) onAction('#open_cultura', 'Ver Módulo Cultura #BogotáModoMetro');
+            }}
+            className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 shadow-sm active:scale-[0.98] group flex items-center justify-between gap-3 ${
+              dark 
+                ? 'bg-gradient-to-r from-[#2c0505]/95 via-[#1a0303] to-[#120202] border-red-700/60 hover:border-red-500 text-amber-100 shadow-red-950/20' 
+                : 'bg-gradient-to-r from-[#FFFDF9] via-[#FFF8EE] to-[#FEF3C7] border-2 border-[#991b1b]/35 hover:border-[#991b1b] text-[#7f1d1d] shadow-sm'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                dark ? 'bg-gradient-to-br from-[#DC2626] to-[#7f1d1d] text-amber-100' : 'bg-gradient-to-br from-[#991b1b] to-[#7f1d1d] text-amber-50'
+              }`}>
+                <HeartHandshake size={16} />
+              </div>
+              <div className="truncate">
+                <span className={`text-[9.5px] font-black uppercase tracking-wider block leading-none mb-1 ${
+                  dark ? 'text-amber-300/90' : 'text-[#991b1b]'
+                }`}>
+                  Pedagogía Cívica, Convivencia y Vagón Escuela
+                </span>
+                <span className={`font-bold text-xs truncate block ${
+                  dark ? 'text-amber-50 group-hover:text-white' : 'text-[#7f1d1d]'
+                }`}>
+                  🎭 Ver Módulo Cultura #BogotáModoMetro
+                </span>
+              </div>
+            </div>
+            <ArrowRight size={15} className={`shrink-0 group-hover:translate-x-1.5 transition-transform ${
+              dark ? 'text-amber-300' : 'text-[#991b1b]'
+            }`} />
+          </button>
+        </div>
+      )}
+
+      {/* 6. CONSULTAS DE OPINIÓN Y PARTICIPACIÓN */}
+      {hasForumAction && (
+        <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button
+            type="button"
+            onClick={() => {
+              if (onAction) onAction('#open_foro', 'Ir al Foro Ciudadano');
+            }}
+            className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 shadow-sm active:scale-[0.98] group flex items-center justify-between gap-3 ${
+              dark 
+                ? 'bg-gradient-to-r from-[#2c0505]/95 via-[#1a0303] to-[#120202] border-red-700/60 hover:border-red-500 text-amber-100 shadow-red-950/20' 
+                : 'bg-gradient-to-r from-[#FFFDF9] via-[#FFF8EE] to-[#FEF3C7] border-2 border-[#991b1b]/35 hover:border-[#991b1b] text-[#7f1d1d] shadow-sm'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                dark ? 'bg-gradient-to-br from-[#DC2626] to-[#7f1d1d] text-amber-100' : 'bg-gradient-to-br from-[#991b1b] to-[#7f1d1d] text-amber-50'
+              }`}>
+                <MessageSquare size={16} />
+              </div>
+              <div className="truncate">
+                <span className={`text-[9.5px] font-black uppercase tracking-wider block leading-none mb-1 ${
+                  dark ? 'text-amber-300/90' : 'text-[#991b1b]'
+                }`}>
+                  Participación, Debate Vecinal y Propuestas
+                </span>
+                <span className={`font-bold text-xs truncate block ${
+                  dark ? 'text-amber-50 group-hover:text-white' : 'text-[#7f1d1d]'
+                }`}>
+                  💬 Ir al Foro Ciudadano
+                </span>
+              </div>
+            </div>
+            <ArrowRight size={15} className={`shrink-0 group-hover:translate-x-1.5 transition-transform ${
+              dark ? 'text-amber-300' : 'text-[#991b1b]'
+            }`} />
+          </button>
         </div>
       )}
     </div>
@@ -406,14 +527,14 @@ export const MetroBot = ({
   const { t, lang, setLang } = useLanguage();
   const activeLangKey = (lang || 'es').toLowerCase();
 
-  // Chips dinámicos contextuales
+  // Chips dinámicos contextuales base por idioma
   const dynamicChips = useMemo(() => {
     return DYNAMIC_CHIPS[activeLangKey] || DYNAMIC_CHIPS.es;
   }, [activeLangKey]);
 
   const [chat, setChat] = useState(() => [{ 
     role: 'bot', 
-    text: getInitialBotMessage(lang) 
+    text: getInitialBotGreeting(lang) 
   }]);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState('');
@@ -426,18 +547,52 @@ export const MetroBot = ({
   const prevLangRef = useRef(lang);
   const initialHandledRef = useRef(false);
 
+  // Obtener el último mensaje del bot para extraer sugerencias y atajos de mapa (FUERA del chat)
+  const lastBotMessage = useMemo(() => {
+    return [...chat].reverse().find(c => c.role === 'bot');
+  }, [chat]);
+
+  // Sugerencias contextuales dinámicas: extraídas del último mensaje o chips predeterminados
+  const activeSuggestions = useMemo(() => {
+    if (lastBotMessage?.text && lastBotMessage.text.includes('[SUGERENCIAS]')) {
+      const parts = lastBotMessage.text.split('[SUGERENCIAS]');
+      if (parts[1]) {
+        const parsed = parts[1]
+          .split('\n')
+          .map(l => l.trim())
+          .filter(l => l.startsWith('- '))
+          .map(l => l.replace(/^- /, '').trim())
+          .filter(Boolean);
+        if (parsed.length > 0) {
+          return parsed.map((item, idx) => ({
+            id: `sug_${idx}`,
+            label: item,
+            prompt: item.replace(/^[📍🗺️💳💼🚇🚲⚡🚧💡🌱🔍•\s]+/, '').trim()
+          }));
+        }
+      }
+    }
+    return dynamicChips;
+  }, [lastBotMessage, dynamicChips]);
+
+  // Estación detectada para acceso rápido en la parte inferior (FUERA del chat)
+  const activeStationOnMap = useMemo(() => {
+    if (!lastBotMessage?.text) return null;
+    return detectStationMention(lastBotMessage.text);
+  }, [lastBotMessage]);
+
   // Sincronización de bienvenida e idioma
   useEffect(() => {
     if (prevLangRef.current !== lang) {
       prevLangRef.current = lang;
-      setChat([{ role: 'bot', text: getInitialBotMessage(lang) }]);
+      setChat([{ role: 'bot', text: getInitialBotGreeting(lang) }]);
       // Detener cualquier voz activa al cambiar de idioma
       if (synthRef.current) {
         synthRef.current.cancel();
         setSpeakingIndex(null);
       }
     } else if (isOpen) {
-      setChat(prev => (prev.length <= 1 ? [{ role: 'bot', text: getInitialBotMessage(lang) }] : prev));
+      setChat(prev => (prev.length <= 1 ? [{ role: 'bot', text: getInitialBotGreeting(lang) }] : prev));
     }
   }, [lang, isOpen]);
 
@@ -463,7 +618,7 @@ export const MetroBot = ({
     }
   }, [isOpen]);
 
-  // ── FUNCIÓN DE TEXTO A VOZ (TTS) (MICRO-INNOVACIÓN 2) ──
+  // ── FUNCIÓN DE TEXTO A VOZ (TTS) ──
   const toggleTTS = (index, rawText) => {
     if (!synthRef.current) return;
 
@@ -492,8 +647,7 @@ export const MetroBot = ({
       es: 'es-CO',
       en: 'en-US',
       pt: 'pt-BR',
-      zh: 'zh-CN',
-      ja: 'ja-JP'
+      zh: 'zh-CN'
     };
     utterance.lang = langMap[activeLangKey] || 'es-CO';
     utterance.rate = 1.0;
@@ -510,47 +664,83 @@ export const MetroBot = ({
   const handleBotAction = (actionId, label) => {
     const cleanId = (actionId || '').replace(/^#/, '');
 
-    if (cleanId === 'action_map' || cleanId === 'nav_mapa') {
+    // 1. MAPA INTERACTIVO
+    if (cleanId === 'open_mapa' || cleanId === 'action_map' || cleanId === 'nav_mapa' || cleanId === 'mapa') {
       if (onNavigate) {
         onNavigate('mapa');
-        onClose();
       }
+      onClose();
       return;
     }
 
-    if (cleanId === 'action_recharge' || cleanId === 'open_saldo' || cleanId === 'tullave') {
+    // 2. SALDO DE TARJETA TULLAVE
+    if (cleanId === 'open_saldo' || cleanId === 'action_recharge' || cleanId === 'saldo' || cleanId === 'tullave') {
       if (onNavigate) {
         onNavigate('saldo');
-        onClose();
       }
+      onClose();
       return;
     }
 
+    // 3. ESTADO DE PROYECTO
     if (cleanId === 'open_project_status' || cleanId === 'action_status') {
       if (onOpenProjectStatus) {
         onOpenProjectStatus();
-        return;
-      }
-      if (onNavigate) {
+      } else if (onNavigate) {
         onNavigate('estado');
-        onClose();
       }
+      onClose();
       return;
     }
 
-    if (cleanId === 'open_portal_empleo' || cleanId.startsWith('job')) {
-      if (onOpenNewsOrJob) {
+    // 4. NOTICIAS E HITOS
+    if (cleanId === 'open_noticias' || cleanId === 'noticias' || cleanId.startsWith('news')) {
+      if (onNavigate) {
+        onNavigate('noticias');
+      } else if (onOpenNewsOrJob) {
+        onOpenNewsOrJob('noticias', cleanId.startsWith('news') ? cleanId : null);
+      }
+      onClose();
+      return;
+    }
+
+    // 5. EMPLEO Y CONVOCATORIAS
+    if (cleanId === 'open_portal_empleo' || cleanId.startsWith('job') || cleanId === 'empleo') {
+      if (onNavigate) {
+        onNavigate('empleo');
+      } else if (onOpenJobModal) {
+        onOpenJobModal();
+      } else if (onOpenNewsOrJob) {
         onOpenNewsOrJob('empleo', null);
-        onClose();
       }
+      onClose();
       return;
     }
 
+    // 6. CULTURA Y #BOGOTÁMODOMETRO
+    if (cleanId === 'open_cultura' || cleanId === 'nav_cultura' || cleanId === 'cultura') {
+      if (onNavigate) {
+        onNavigate('cultura');
+      }
+      onClose();
+      return;
+    }
+
+    // 7. FORO CIUDADANO
+    if (cleanId === 'open_foro' || cleanId === 'foro' || cleanId === 'forum') {
+      if (onNavigate) {
+        onNavigate('foro');
+      }
+      onClose();
+      return;
+    }
+
+    // 8. REPORTE DE INCIDENCIAS
     if (cleanId === 'action_report' || cleanId === 'report_incident') {
       if (onReportIncident) {
         onReportIncident();
-        onClose();
       }
+      onClose();
       return;
     }
   };
@@ -576,10 +766,14 @@ export const MetroBot = ({
     }
   };
 
-  // Enviar pregunta
+  // Enviar pregunta con sanitización de seguridad estricta
   const ask = async (overrideMsg) => {
-    const msg = (overrideMsg || input).trim();
-    if (!msg || loading) return;
+    const rawMsg = (overrideMsg || input).trim();
+    if (!rawMsg || loading) return;
+
+    // Sanitización contra SQL Injection y XSS/Code Injection
+    const msg = sanitizeChatMessage(rawMsg);
+    if (!msg) return;
 
     // Detener voz anterior si estaba hablando
     if (synthRef.current) {
@@ -587,15 +781,129 @@ export const MetroBot = ({
       setSpeakingIndex(null);
     }
 
+    // 1. Amplitud de memoria contextual: retener los últimos 10 turnos de conversación activos (hasta 20 intercambios)
+    const currentHistory = [...chat].slice(-20);
     setChat(prev => [...prev, { role: 'user', text: msg }]);
     setInput('');
     setLoading(true);
 
+    // ── INTERCEPTOR DE MENSAJES DE EMPLEO (FRONTEND) CON SOPORTE 5 IDIOMAS ──
+    const isEmp = isEmploymentQuery(msg);
+
+    if (isEmp) {
+      setTimeout(() => {
+        const employmentTexts = {
+          es: `💼 **Convocatorias Laborales Oficiales del Metro de Bogotá:**
+
+Las vacantes operativas (operadores CBTC, electricistas, técnicos electromecánicos e inspectores de vía) se gestionan **100% gratis** a través de la **Agencia Pública de Empleo del SENA** y el concesionario **Metro Línea 1 S.A.S.**
+
+🔧 **Perfiles Técnicos y Operativos Disponibles:**
+• **Operadores y Controladores de Tráfico Ferroviario CBTC:** Monitoreo y operación de trenes automáticos con tecnología GoA4.
+• **Técnicos Electricistas de Media y Alta Tensión:** Mantenimiento de subestaciones de tracción (SET) y catenarias.
+• **Técnicos Electromecánicos e Inspectores de Vía Permanente:** Monitoreo, diagnóstico y mantenimiento de rieles y aparatos de vía.
+• **Auxiliares de Obra Civil y Montaje:** Plazas con y sin experiencia previa con formación técnica remunerada.
+
+📢 **Canales Oficiales y Gratuitos de Postulación:**
+1. **Agencia Pública de Empleo del SENA:** Portal web oficial **ape.sena.edu.co**.
+2. **Concesionario Metro Línea 1 S.A.S.:** Portal de talento **www.metrolinea1.com**.
+3. **Empresa Metro de Bogotá (EMB):** Sitio web institucional **www.metrodebogota.gov.co**.
+
+⚠️ Las postulaciones son totalmente gratuitas. Ningún intermediario ni particular cobra por exámenes médicos, recepción de hojas de vida ni vinculación laboral.
+
+[ACTION: OPEN_EMPLOYMENT_MODULE]
+
+[SUGERENCIAS]
+- 💼 ¿Cuáles son los requisitos para técnico electricista?
+- 📋 ¿Cómo postular mi hoja de vida en el SENA?
+- 🚇 ¿Qué capacitación reciben los operadores CBTC?`,
+
+          en: `💼 **Official Job Openings for Bogotá Metro:**
+
+Operational positions (CBTC operators, high-voltage electricians, electromechanical technicians, and track inspectors) are managed **100% free** through the **SENA Public Employment Agency** and concessionaire **Metro Línea 1 S.A.S.**
+
+🔧 **Available Technical & Operational Roles:**
+• **CBTC Rail Traffic Controllers & Operators:** Monitoring and controlling automatic trains equipped with GoA4 driverless technology.
+• **Medium & High Voltage Electrical Technicians:** Maintenance of traction power substations (SET) and overhead catenary systems.
+• **Electromechanical Technicians & Track Inspectors:** Routine diagnostics and maintenance of permanent track and turnout points.
+• **Civil Works & Assembly Assistants:** Entry-level and experienced roles with paid certified technical training.
+
+📢 **Official & Free Application Channels:**
+1. **SENA Public Employment Agency:** Official portal **ape.sena.edu.co**.
+2. **Concessionaire Metro Línea 1 S.A.S.:** Talent portal **www.metrolinea1.com**.
+3. **Empresa Metro de Bogotá (EMB):** Institutional website **www.metrodebogota.gov.co**.
+
+⚠️ Applications are completely free of charge. No legitimate recruiter charges for interviews, medical exams, or onboarding.
+
+[ACTION: OPEN_EMPLOYMENT_MODULE]
+
+[SUGERENCIAS]
+- 💼 What are the requirements for electrical technicians?
+- 📋 How do I submit my resume on SENA?
+- 🚇 What training do CBTC operators receive?`,
+
+          pt: `💼 **Convocatórias de Emprego Oficiais do Metrô de Bogotá:**
+
+As vagas operacionais (operadores CBTC, eletricistas, técnicos eletromecânicos e inspetores de via) são intermediadas **100% de forma gratuita** pela **Agência Pública de Emprego do SENA** e pela concessionária **Metro Línea 1 S.A.S.**
+
+🔧 **Perfis Técnicos e Operacionais Disponíveis:**
+• **Controladores e Operadores de Tráfego Ferroviário CBTC:** Monitoramento e condução de trens automáticos com tecnologia GoA4 sem condutor.
+• **Técnicos Eletricistas de Média e Alta Tensão:** Manutenção de subestações de tração (SET) e rede aérea de catenárias.
+• **Técnicos Eletromecânicos e Inspetores de Via Permanente:** Diagnóstico e manutenção de trilhos e aparelhos de mudança de via.
+• **Auxiliares de Obras Civis e Montagem:** Vagas com e sem experiência prévia com treinamento técnico remunerado.
+
+📢 **Canais Oficiais e Gratuitos de Candidatura:**
+1. **Agência Pública de Emprego do SENA:** Portal oficial **ape.sena.edu.co**.
+2. **Concessionária Metro Línea 1 S.A.S.:** Portal de talentos **www.metrolinea1.com**.
+3. **Empresa Metro de Bogotá (EMB):** Site institucional **www.metrodebogota.gov.co**.
+
+⚠️ Os processos seletivos são totalmente gratuitos. Nenhum intermediário cobra taxas para exames médicos ou cadastramento de currículos.
+
+[ACTION: OPEN_EMPLOYMENT_MODULE]
+
+[SUGERENCIAS]
+- 💼 Quais são os requisitos para técnico eletricista?
+- 📋 Como cadastrar meu currículo no SENA?
+- 🚇 Que capacitação os operadores CBTC recebem?`,
+
+          zh: `💼 **波哥大地铁官方公开招聘与就业岗位：**
+
+所有一线运营与工程技术岗位（CBTC无人驾驶调度员、高压电气工程师、机电维保技师及线路巡检员）均**完全免费**由**哥伦比亚国家学徒服务局（SENA）公共就业服务平台**与**Metro Línea 1 S.A.S.特许经营公司**联合直招。
+
+🔧 **热招技术与运营岗位类别：**
+• **CBTC 铁路列车调度员与控制中心操作员：** 负责GoA4全自动无人驾驶列车系统的监控与运行调度。
+• **中高压电气维护技师：** 负责牵引变电所（SET）与接触网供电系统的维护检修。
+• **机电技工与轨道线路巡检员：** 负责钢轨几何尺寸、道岔及机电设备的状态诊断与周期保养。
+• **土建施工与轨道装配普工/学徒：** 提供带薪专业技术实训，欢迎有无工程经验者报名。
+
+📢 **官方直聘报名渠道（绝无中介费）：**
+1. **SENA 公共就业服务局:** 官方平台 **ape.sena.edu.co**。
+2. **Metro Línea 1 S.A.S. 特许经营公司:** 招聘官网 **www.metrolinea1.com**。
+3. **波哥大地铁公司 (EMB):** 官方网站 **www.metrodebogota.gov.co**。
+
+⚠️ 所有岗位应聘与考评均 100% 免费。严禁向求职者收取体检费、建档费或入职中介费。
+
+[ACTION: OPEN_EMPLOYMENT_MODULE]
+
+[SUGERENCIAS]
+- 💼 电气维护技术人员的应聘要求是什么？
+- 📋 如何在 SENA 就业平台提交个人简历？
+- 🚇 CBTC 调度员需要接受哪些专业实操培训？`
+        };
+
+        const activeEmpLang = (lang || 'es').toLowerCase();
+        const cleanEmploymentText = employmentTexts[activeEmpLang] || employmentTexts.es;
+        setChat(prev => [...prev, { role: 'bot', text: cleanEmploymentText }]);
+        setLoading(false);
+      }, 300);
+      return;
+    }
+
     setTimeout(async () => {
-      const res = await getMetroBotResponse(msg, lang, t);
+      // Llamada al motor de IA pasando la memoria contextual (10 turnos) y el diccionario KNOWLEDGE_BASE
+      const res = await getMetroBotResponse(msg, lang, t, currentHistory, KNOWLEDGE_BASE);
       setChat(prev => [...prev, { role: 'bot', text: res }]);
       setLoading(false);
-    }, 500);
+    }, 250);
   };
 
   if (!isOpen) return null;
@@ -629,11 +937,10 @@ export const MetroBot = ({
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse shrink-0" />
                 <span className={`text-[10px] font-bold uppercase tracking-widest truncate ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {activeLangKey === 'zh' ? '多语种智能助理 (西 · 英 · 葡 · 中 · 日)' :
-                   activeLangKey === 'en' ? 'Online AI Assistant (ES · EN · PT · ZH · JA)' :
-                   activeLangKey === 'pt' ? 'Assistente Virtual Online (ES · EN · PT · ZH · JA)' :
-                   activeLangKey === 'ja' ? '公式AIアシスタント (西・英・葡・中・日)' :
-                   'Asistente Oficial en Línea (ES · EN · PT · ZH · JA)'}
+                  {activeLangKey === 'zh' ? '多语种智能助理 (西 · 英 · 葡 · 中)' :
+                   activeLangKey === 'en' ? 'Online AI Assistant (ES · EN · PT · ZH)' :
+                   activeLangKey === 'pt' ? 'Assistente Virtual Online (ES · EN · PT · ZH)' :
+                   'Asistente Oficial en Línea (ES · EN · PT · ZH)'}
                 </span>
               </div>
             </div>
@@ -646,8 +953,7 @@ export const MetroBot = ({
                 { code: 'es', label: 'ES' },
                 { code: 'en', label: 'EN' },
                 { code: 'pt', label: 'PT' },
-                { code: 'zh', label: '中文' },
-                { code: 'ja', label: '日本語' }
+                { code: 'zh', label: '中文' }
               ].map(item => (
                 <button
                   key={item.code}
@@ -697,7 +1003,7 @@ export const MetroBot = ({
                     : 'bg-white text-zinc-900 border border-zinc-200 rounded-bl-sm'
               }`}>
                 
-                {/* ── BOTÓN DE TEXTO A VOZ (TTS) (MICRO-INNOVACIÓN 2) ── */}
+                {/* ── BOTÓN DE TEXTO A VOZ (TTS) ── */}
                 {c.role === 'bot' && (
                   <button
                     type="button"
@@ -718,10 +1024,7 @@ export const MetroBot = ({
                   <RenderBotText 
                     text={c.text} 
                     dark={dark} 
-                    onAction={handleBotAction} 
-                    onAsk={(q) => ask(q)} 
-                    onFocusStation={handleFocusStationOnMap}
-                    t={t}
+                    onAction={handleBotAction}
                   />
                 ) : (
                   c.text
@@ -748,16 +1051,37 @@ export const MetroBot = ({
           <div ref={bottomRef} />
         </div>
 
-        {/* ── FOOTER CON CHIPS DINÁMICOS CONTEXTUALES Y FORMULARIO (MICRO-INNOVACIÓN 2) ── */}
+        {/* ── FOOTER CON CHIPS DINÁMICOS CONTEXTUALES Y FORMULARIO (FUERA DEL CHAT) ── */}
         <div className={`shrink-0 p-3 sm:p-4 border-t flex flex-col gap-2.5 ${
           dark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'
         }`}>
-          {/* Barra de Chips Dinámicos Deslizables */}
+          {/* Acceso Rápido al Mapa si la respuesta mencionó una estación */}
+          {activeStationOnMap && onFocusStation && (
+            <button
+              type="button"
+              onClick={() => handleFocusStationOnMap(activeStationOnMap)}
+              className={`w-full py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 transition-all active:scale-[0.98] shadow-2xs group ${
+                dark 
+                  ? 'bg-zinc-800/90 hover:bg-zinc-700 border-cyan-500/40 text-cyan-300' 
+                  : 'bg-cyan-50 hover:bg-cyan-100 border-cyan-300 text-cyan-900'
+              }`}
+            >
+              <span className="flex items-center gap-2 truncate">
+                <Compass size={14} className="shrink-0 text-cyan-500 group-hover:rotate-45 transition-transform" />
+                <span className="truncate">
+                  🗺️ {(t ? t('mapModule.btnFocusMap', 'Enfocar en el Mapa') : 'Enfocar en el Mapa')}: <strong>{activeStationOnMap.name}</strong>
+                </span>
+              </span>
+              <ArrowRight size={13} className="shrink-0 group-hover:translate-x-1 transition-transform" />
+            </button>
+          )}
+
+          {/* Barra de Chips Dinámicos Deslizables (FUERA del mensaje del chat) */}
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar w-full max-w-full">
-            {dynamicChips.map(chip => (
+            {activeSuggestions.map(chip => (
               <button 
-                key={chip.id} 
-                onClick={() => ask(chip.prompt)}
+                key={chip.id || chip.label} 
+                onClick={() => ask(chip.prompt || chip.label)}
                 className={`shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs ${
                   dark 
                     ? 'bg-zinc-800/90 border-zinc-700/80 text-zinc-300 hover:bg-zinc-700 hover:text-white hover:border-zinc-500' 

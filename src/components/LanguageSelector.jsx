@@ -6,8 +6,7 @@ export const LANGUAGES = [
   { code: 'ES', flag: '🇪🇸', label: 'ES', full: 'Español', native: 'Español' },
   { code: 'EN', flag: '🇺🇸', label: 'EN', full: 'English', native: 'English' },
   { code: 'PT', flag: '🇧🇷', label: 'PT', full: 'Português', native: 'Português' },
-  { code: 'ZH', flag: '🇨🇳', label: 'ZH', full: '中文', native: '中文 (简体)' },
-  { code: 'JA', flag: '🇯🇵', label: 'JA', full: '日本語', native: '日本語' }
+  { code: 'ZH', flag: '🇨🇳', label: 'ZH', full: '中文', native: '中文 (简体)' }
 ];
 
 /**

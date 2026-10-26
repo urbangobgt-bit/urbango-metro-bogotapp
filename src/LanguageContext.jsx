@@ -4,7 +4,7 @@ import i18n from './i18n.js';
 
 export const LanguageContext = createContext(null);
 
-export const SUPPORTED_LANGUAGES = ['es', 'en', 'pt', 'zh', 'ja'];
+export const SUPPORTED_LANGUAGES = ['es', 'en', 'pt', 'zh'];
 
 // Helper to clean technical keys as safety net
 export const cleanTechnicalKey = (key) => {

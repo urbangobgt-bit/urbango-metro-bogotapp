@@ -38,6 +38,7 @@ import {
   getLocalizedJobAreas
 } from '../data/metroJobsData';
 import { useLanguage } from '../LanguageContext';
+import { sanitizeInput, sanitizeFormData, sanitizeSearchQuery } from '../utils/securitySanitizer';
 
 export default function PortalEmpleoView({
   dark = false,
@@ -238,7 +239,7 @@ export default function PortalEmpleoView({
     return filteredAreas.reduce((acc, curr) => acc + curr.jobs.length, 0);
   }, [filteredAreas]);
 
-  // Handle application submission
+  // Handle application submission con sanitización estricta contra SQLi / Inyección de código
   const handleSubmitApplication = (e) => {
     e.preventDefault();
     const code = 'EMB-2026-' + Math.floor(10000 + Math.random() * 90000);
@@ -247,11 +248,12 @@ export default function PortalEmpleoView({
 
     try {
       const existing = JSON.parse(localStorage.getItem('urbango_job_applications') || '[]');
+      const cleanApplicant = sanitizeFormData(applicantForm);
       existing.unshift({
         jobId: jobToApply?.id || 'general',
-        jobTitle: jobToApply?.title || 'Convocatoria General L1',
-        area: jobToApply?.areaName || 'Metro de Bogotá L1',
-        applicant: applicantForm,
+        jobTitle: sanitizeInput(jobToApply?.title || 'Convocatoria General L1', 120),
+        area: sanitizeInput(jobToApply?.areaName || 'Metro de Bogotá L1', 80),
+        applicant: cleanApplicant,
         date: new Date().toISOString(),
         code
       });
@@ -656,7 +658,7 @@ export default function PortalEmpleoView({
                 type="text"
                 placeholder={t('jobsModule.searchPlaceholder', 'Buscar por cargo, palabra clave o requisito...')}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(sanitizeSearchQuery(e.target.value, 80))}
                 className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs font-semibold border transition-all focus:outline-none focus:ring-2 focus:ring-[#2D8B3C] ${
                   dark ? 'bg-zinc-800 border-zinc-700 text-white placeholder-zinc-500' : 'bg-zinc-50 border-zinc-200 text-zinc-900 placeholder-zinc-400'
                 }`}

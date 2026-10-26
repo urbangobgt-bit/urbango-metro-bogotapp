@@ -16,138 +16,10 @@ import {
   Layers
 } from 'lucide-react';
 import { useI18n } from '../i18nContext';
+import { NEWS_DATABASE } from '../data/newsData';
 
-// Master collection of authentic news categorized per requirement
-export const NEWS_DATABASE = [
-  {
-    id: 'n1',
-    category: 'obras',
-    categoryLabel: 'Obras y Avance',
-    title: 'Hito histórico: El viaducto de la Línea 1 supera el 82% de ejecución física',
-    excerpt: 'Con 6 vigas lanzadoras activas en los frentes de Bosa, Primero de Mayo y la Av. Caracas, la Empresa Metro de Bogotá reporta un avance acumulado del 82,33% en toda la infraestructura.',
-    content: 'La Empresa Metro de Bogotá (EMB) confirmó que el proyecto de la Primera Línea ha alcanzado el 82,33% de avance físico general. En los talleres de Bosa, el viaducto elevado avanza sin interrupciones con la instalación sistemática de dovelas y los trenes número 1 y 2 en pruebas técnicas sobre vía.',
-    date: '14 Sep 2026',
-    readMin: 4,
-    localidad: 'Kennedy / Bosa',
-    isLive: true,
-    isBreaking: true,
-    img: '/Corredor central.jfif',
-    source: 'Empresa Metro de Bogotá',
-    url: 'https://www.metrodebogota.gov.co'
-  },
-  {
-    id: 'n2',
-    category: 'obras',
-    categoryLabel: 'Obras y Avance',
-    title: 'Intercambiador subterráneo de la Calle 72 entra en fase final de integración peatonal',
-    excerpt: 'Finalizan obras estructurales bajo la Avenida Caracas y Carrera 15, permitiendo el flujo continuo del tráfico mixto y la futura conexión directa con la Línea 2.',
-    content: 'El paso a desnivel de la Calle 72 ya opera plenamente para descongestionar el norte de Bogotá. Los equipos concentran esfuerzos en el espacio público circundante, rampas de accesibilidad universal y la futura estación 16.',
-    date: '12 Sep 2026',
-    readMin: 3,
-    localidad: 'Barrios Unidos / Chapinero',
-    isLive: false,
-    isBreaking: false,
-    img: '/caracas calle 69 y 72a.png',
-    source: 'Secretaría Distrital de Movilidad',
-    url: 'https://www.movilidadbogota.gov.co'
-  },
-  {
-    id: 'n3',
-    category: 'sostenibilidad',
-    categoryLabel: 'Sostenibilidad',
-    title: 'El Metro evitará 171.000 toneladas de CO₂ al año en la cuenca de Bogotá',
-    excerpt: 'Operación 100% eléctrica con frenado regenerativo y subestaciones eléctricas alimentadas por fuentes renovables certificadas.',
-    content: 'Al sustituir más de 19 millones de viajes anuales en vehículos de combustión fósil, la Primera Línea del Metro se consolida como el proyecto de descarbonización urbana más ambicioso de Colombia. Además, se han sembrado más de 6.000 árboles de especies nativas en el corredor de compensación ambiental.',
-    date: '10 Sep 2026',
-    readMin: 3,
-    localidad: 'Bogotá Región',
-    isLive: false,
-    isBreaking: false,
-    img: '/Parque de los hippies.jfif',
-    source: 'Secretaría de Ambiente',
-    url: 'https://www.ambientebogota.gov.co'
-  },
-  {
-    id: 'n4',
-    category: 'sostenibilidad',
-    categoryLabel: 'Sostenibilidad',
-    title: 'Plan de Renaturalización: Nuevos corredores verdes a lo largo de la Av. Primero de Mayo',
-    excerpt: 'Se implementan jardines de lluvia y sistemas de drenaje sostenible (SUDs) en los bajos del viaducto para mitigar islas de calor.',
-    content: 'Bajo el viaducto elevado se están instalando senderos peatonales permeables, ciclorrutas iluminadas con tecnología solar y franjas de jardinería urbana que absorben el agua lluvia y reducen el ruido ambiental en las localidades del sur.',
-    date: '08 Sep 2026',
-    readMin: 2,
-    localidad: 'Antonio Nariño / Puente Aranda',
-    isLive: false,
-    isBreaking: false,
-    img: '/Corredor central.jfif',
-    source: 'Jardín Botánico de Bogotá',
-    url: 'https://www.jbb.gov.co'
-  },
-  {
-    id: 'n5',
-    category: 'licitaciones',
-    categoryLabel: 'Licitaciones',
-    title: 'Licitación Internacional de la Línea 2 Subterránea recibe propuestas de consorcios globales',
-    excerpt: 'El corredor de 15,5 km que conectará Chapinero, Barrios Unidos, Engativá y Suba avanza hacia su adjudicación definitiva.',
-    content: 'Con el respaldo financiero del Banco Interamericano de Desarrollo (BID), el Banco Mundial (BIRF) y el Banco Europeo de Inversiones (BEI), avanza la fase de evaluación técnica y financiera para la construcción y operación de la segunda línea 100% subterránea.',
-    date: '05 Sep 2026',
-    readMin: 4,
-    localidad: 'Suba / Engativá',
-    isLive: false,
-    isBreaking: true,
-    img: '/caracas calle 19 y 22.jfif',
-    source: 'SECOP II / EMB',
-    url: 'https://www.colombiacompra.gov.co'
-  },
-  {
-    id: 'n6',
-    category: 'licitaciones',
-    categoryLabel: 'Licitaciones',
-    title: 'Publicados pliegos para la Extensión de la Línea 1 hasta la Calle 100',
-    excerpt: 'Estudio de factibilidad y diseños de detalle para las 4 nuevas estaciones elevadas sobre la troncal Caracas Norte.',
-    content: 'La EMB abrió el proceso contractual para los estudios de ingeniería de valor de la extensión norte de la L1MB, que conectará la Calle 72 con la Calle 100, facilitando el transbordo directo con la nueva troncal de la Carrera 68 y el Regiotram del Norte.',
-    date: '02 Sep 2026',
-    readMin: 3,
-    localidad: 'Usaquén / Chapinero',
-    isLive: false,
-    isBreaking: false,
-    img: '/Caracas.jfif',
-    source: 'Empresa Metro de Bogotá',
-    url: 'https://www.metrodebogota.gov.co'
-  },
-  {
-    id: 'n7',
-    category: 'empleo_cultura',
-    categoryLabel: 'Empleo y Cultura',
-    title: 'Feria de Empleo Metro: Convocatoria abierta para 180 vacantes de operación y mantenimiento',
-    excerpt: 'Perfiles para técnicos electricistas, inspectores de vía férrea, operadores de estación y controladores de tráfico CBTC.',
-    content: 'El concesionario Metro Línea 1 y la Alcaldía Mayor habilitaron mesas de postulación priorizadas para residentes de las localidades de Bosa, Kennedy, Antonio Nariño, Santa Fe y Chapinero. La formación técnica cuenta con becas de certificación en sistemas ferroviarios GoA4.',
-    date: '01 Sep 2026',
-    readMin: 2,
-    localidad: 'Bosa / Kennedy',
-    isLive: false,
-    isBreaking: false,
-    img: '/caracas calle 13 y 19.jfif',
-    source: 'Agencia Distrital de Empleo',
-    url: 'https://bogotatrabaja.gov.co'
-  },
-  {
-    id: 'n8',
-    category: 'empleo_cultura',
-    categoryLabel: 'Empleo y Cultura',
-    title: 'Cultura Metro: Nace el programa de convivencia y arte en las estaciones elevadas',
-    excerpt: 'Artistas locales intervienen murales y se lanzan talleres de apropiación ciudadana en colegios y centros comunales.',
-    content: 'Inspirado en el civismo y respeto que caracterizarán el nuevo sistema de transporte, la Secretaría de Cultura y la EMB lanzaron el decálogo de Cultura Metro con intervenciones artísticas, exposiciones fotográficas de la historia del transporte y guías escolares.',
-    date: '28 Ago 2026',
-    readMin: 3,
-    localidad: 'Todas las localidades',
-    isLive: false,
-    isBreaking: false,
-    img: '/Corredor central.jfif',
-    source: 'Secretaría de Cultura, Recreación y Deporte',
-    url: 'https://www.culturarecreacionydeporte.gov.co'
-  }
-];
+// Re-export for any modules relying on NewsFeed export
+export { NEWS_DATABASE };
 
 const CATEGORY_MAP = {
   todas: { label: 'Todas', labelEn: 'All' },
@@ -183,16 +55,25 @@ export const NewsFeed = ({
   // Filtered and Searched items
   const filteredNews = useMemo(() => {
     return NEWS_DATABASE.filter(item => {
-      const matchCategory = selectedCategory === 'todas' || item.category === selectedCategory;
+      const matchCategory = selectedCategory === 'todas' || 
+        item.category === selectedCategory || 
+        item.categoryKey === selectedCategory;
       if (!matchCategory) return false;
 
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase().trim();
+      const title = (item.title || item.titulo || '').toLowerCase();
+      const excerpt = (item.excerpt || item.resumen || item.subtitulo || item.subtitle || '').toLowerCase();
+      const content = (item.contenidoCompleto || item.content || item.fullText || '').toLowerCase();
+      const loc = (item.localidad || '').toLowerCase();
+      const cat = (item.categoryLabel || item.categoria || '').toLowerCase();
+
       return (
-        item.title.toLowerCase().includes(q) ||
-        item.excerpt.toLowerCase().includes(q) ||
-        item.localidad.toLowerCase().includes(q) ||
-        item.categoryLabel.toLowerCase().includes(q)
+        title.includes(q) ||
+        excerpt.includes(q) ||
+        content.includes(q) ||
+        loc.includes(q) ||
+        cat.includes(q)
       );
     });
   }, [selectedCategory, searchQuery]);
