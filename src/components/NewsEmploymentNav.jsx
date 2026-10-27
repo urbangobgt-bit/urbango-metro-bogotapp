@@ -1,5 +1,6 @@
 import React from 'react';
 import { Newspaper, Briefcase } from 'lucide-react';
+import { useI18n } from '../i18nContext';
 
 /**
  * Barra superior de navegación dual para Noticias e Hitos vs Empleo y Convocatorias.
@@ -10,6 +11,8 @@ export const NewsEmploymentNav = ({
   onTabChange,
   dark = false
 }) => {
+  const { t } = useI18n();
+
   return (
     <div className="w-full mb-6">
       <div
@@ -34,7 +37,7 @@ export const NewsEmploymentNav = ({
             }`}
           >
             <Newspaper size={17} className={activeTab === 'noticias' ? 'text-[#FFF8E7]' : dark ? 'text-zinc-400' : 'text-[#800020]'} />
-            <span className="truncate">📰 Noticias e Hitos</span>
+            <span className="truncate">📰 {t('newsNav.newsTab', 'Noticias e Hitos')}</span>
           </button>
 
           {/* Pestaña: Empleo y Convocatorias */}
@@ -50,7 +53,7 @@ export const NewsEmploymentNav = ({
             }`}
           >
             <Briefcase size={17} className={activeTab === 'empleo' ? 'text-[#FFF8E7]' : dark ? 'text-zinc-400' : 'text-[#800020]'} />
-            <span className="truncate">💼 Empleo y Convocatorias</span>
+            <span className="truncate">💼 {t('newsNav.jobsTab', 'Empleo y Convocatorias')}</span>
           </button>
         </div>
 
@@ -58,10 +61,10 @@ export const NewsEmploymentNav = ({
         <div className="hidden lg:flex items-center gap-2 pr-3 text-right">
           <div className="flex flex-col items-end">
             <span className="text-[9.5px] font-black uppercase tracking-widest text-[#800020] dark:text-red-400">
-              Línea 1 Metro Bogotá
+              {t('newsNav.line1Title', 'Línea 1 Metro Bogotá')}
             </span>
             <span className={`text-[10px] font-semibold ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              Canal Oficial EMB
+              {t('newsNav.embChannel', 'Canal Oficial EMB')}
             </span>
           </div>
         </div>

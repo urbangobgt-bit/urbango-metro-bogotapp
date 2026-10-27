@@ -52,46 +52,46 @@ export const NewsModule = ({
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#800020] text-[#FFF8E7] text-[10px] font-black uppercase tracking-wider shadow-sm">
               <Sparkles size={12} />
-              <span>Avance Físico Oficial EMB</span>
+              <span>{t('newsBanner.officialProgressBadge', 'AVANCE FÍSICO OFICIAL EMB')}</span>
             </div>
             <span className={`text-[10px] font-bold uppercase tracking-wider ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-              Corte Consolidado 2026
+              {t('newsBanner.consolidatedCutOff', 'CORTE CONSOLIDADO 2026')}
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             <div className="md:col-span-8 space-y-2">
               <h1 className={`text-2xl sm:text-3xl font-black italic tracking-tight leading-tight ${dark ? 'text-white' : 'text-[#800020]'}`}>
-                Avance General del Viaducto alcanza el <span className="text-[#B30000] dark:text-red-400 underline decoration-red-500/40">82,33%</span>
+                {t('newsBanner.title', 'Avance General del Viaducto alcanza el 82,33%')}
               </h1>
               <p className={`text-xs sm:text-sm font-medium leading-relaxed ${dark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                Con 6 vigas lanzadoras activas en los frentes de Bosa, Primero de Mayo y la Avenida Caracas, la instalación de dovelas prefabricadas avanza en tiempo récord. En el Patio Taller de Bosa, los trenes automáticos 1 y 2 continúan sus pruebas técnicas de rodaje sobre vía.
+                {t('newsBanner.desc', 'Con 6 vigas lanzadoras activas en los frentes de Bosa, Primero de Mayo y la Avenida Caracas, la instalación de dovelas prefabricadas avanza en tiempo récord. En el Patio Taller de Bosa, los trenes automáticos 1 y 2 continúan sus pruebas técnicas de rodaje sobre vía.')}
               </p>
 
               {/* Indicadores rápidos de hitos */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2">
                 <div className={`p-2.5 rounded-xl border ${dark ? 'bg-zinc-800/80 border-zinc-700/60' : 'bg-white/80 border-[#800020]/15'}`}>
                   <span className={`text-[8.5px] font-black uppercase block ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Vigas Lanzadoras
+                    {t('newsBanner.gantriesLabel', 'VIGAS LANZADORAS')}
                   </span>
                   <span className="text-sm font-black text-[#800020] dark:text-red-400">
-                    6 Activas
+                    {t('newsBanner.gantriesValue', '6 Activas')}
                   </span>
                 </div>
                 <div className={`p-2.5 rounded-xl border ${dark ? 'bg-zinc-800/80 border-zinc-700/60' : 'bg-white/80 border-[#800020]/15'}`}>
                   <span className={`text-[8.5px] font-black uppercase block ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Patio Taller Bosa
+                    {t('newsBanner.yardLabel', 'PATIO TALLER BOSA')}
                   </span>
                   <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-                    91% Ejecutado
+                    {t('newsBanner.yardValue', '91% Ejecutado')}
                   </span>
                 </div>
                 <div className={`p-2.5 rounded-xl border col-span-2 sm:col-span-1 ${dark ? 'bg-zinc-800/80 border-zinc-700/60' : 'bg-white/80 border-[#800020]/15'}`}>
                   <span className={`text-[8.5px] font-black uppercase block ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Intercambiador Cll 72
+                    {t('newsBanner.interchangeLabel', 'INTERCAMBIADOR CLL 72')}
                   </span>
                   <span className="text-sm font-black text-blue-600 dark:text-blue-400">
-                    93% Culminado
+                    {t('newsBanner.interchangeValue', '93% Culminado')}
                   </span>
                 </div>
               </div>
@@ -116,11 +116,11 @@ export const NewsModule = ({
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-2xl font-black tracking-tight text-[#800020] dark:text-white">82,33%</span>
-                  <span className={`text-[7.5px] font-black uppercase tracking-widest ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>Viaducto L1</span>
+                  <span className={`text-[7.5px] font-black uppercase tracking-widest ${dark ? 'text-zinc-400' : 'text-zinc-500'}`}>{t('newsBanner.viaductL1', 'VIADUCTO L1')}</span>
                 </div>
               </div>
               <p className={`text-[9px] font-bold text-center mt-2 ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                16 Estaciones · 23.9 km Viaducto
+                {t('newsBanner.stationsFootnote', '16 Estaciones · 23.9 km Viaducto')}
               </p>
             </div>
           </div>

@@ -3060,4 +3060,272 @@ for (const [langKey, data] of Object.entries(__CULTURA_I18N)) {
   });
 }
 
+// ── URBANGO STRICT 4-LANGUAGE ENRICHMENT (ES, EN, PT, ZH) ──
+const __URBANGO_I18N_V4 = {
+  es: {
+    app: {
+      titleSlogan: "UrbanGo - Metro de Bogotá",
+      slogan: "Primera Línea del Metro de Bogotá"
+    },
+    nav: {
+      cultura: "Cultura Metro",
+      news: "Noticias e Hitos",
+      jobs: "Empleos y Convocatorias",
+      map: "Mapa Interactivo",
+      cardBalance: "Saldo TuLlave",
+      forum: "Foro Ciudadano"
+    },
+    sidebar_cultura: "Cultura Metro",
+    bubbles: {
+      news: "Noticias e Hitos",
+      jobs: "Empleos y Convocatorias",
+      cultura: "Cultura Metro",
+      saldo: "Saldo TuLlave",
+      map: "Mapa Interactivo",
+      forum: "Foro Ciudadano",
+      metro2026: "METRO 2026"
+    },
+    newsNav: {
+      newsTab: "Noticias e Hitos de la Obra",
+      jobsTab: "Empleos y Convocatorias SENA",
+      line1Title: "Línea 1 Metro Bogotá",
+      embChannel: "Canal Oficial EMB"
+    },
+    newsBanner: {
+      officialProgressBadge: "AVANCE FÍSICO OFICIAL EMB",
+      consolidatedCutOff: "CORTE CONSOLIDADO 2026",
+      title: "Avance General del Viaducto alcanza el 82,33%",
+      desc: "Con 6 vigas lanzadoras activas en los frentes de Bosa, Primero de Mayo y la Avenida Caracas, la instalación de dovelas prefabricadas avanza en tiempo récord. En el Patio Taller de Bosa, los trenes automáticos 1 y 2 continúan sus pruebas técnicas de rodaje sobre vía.",
+      gantriesLabel: "VIGAS LANZADORAS",
+      gantriesValue: "6 Activas",
+      yardLabel: "PATIO TALLER BOSA",
+      yardValue: "91% Ejecutado",
+      interchangeLabel: "INTERCAMBIADOR CLL 72",
+      interchangeValue: "93% Culminado",
+      viaductL1: "VIADUCTO L1",
+      stationsFootnote: "16 Estaciones · 23.9 km Viaducto"
+    },
+    employmentBanner: {
+      officialRecruitmentBadge: "CONVOCATORIA LABORAL OFICIAL",
+      activeOpeningsBadge: "180+ VACANTES ACTIVAS",
+      title: "Portal de Empleo y Talento Metro: SENA & Metro Línea 1 S.A.S.",
+      desc: "El concesionario Metro Línea 1 S.A.S. y la Agencia Pública de Empleo del SENA abren convocatorias laborales directas para la operación, mantenimiento y puesta en marcha comercial de la Primera Línea del Metro de Bogotá.",
+      freeNoticeTitle: "POSTULACIÓN 100% GRATUITA",
+      freeNoticeDesc: "Ninguna persona, empresa o sindicato cobra por aplicar a estas vacantes ni por exámenes médicos o certificaciones.",
+      exclusiveChannel: "Canal exclusivo: ape.sena.edu.co & Concesionario Metro Línea 1 S.A.S.",
+      role1Title: "CONDUCTORES GOA4",
+      role1Desc: "Supervisión y control de trenes 100% automatizados sin conductor CBTC.",
+      role2Title: "MANTENIMIENTO VÍA",
+      role2Desc: "Técnicos de vía férrea, catenaria aérea y subestaciones eléctricas.",
+      role3Title: "SEÑALIZACIÓN CBTC",
+      role3Desc: "Telecomunicaciones ferroviarias, radio TETRA y sistemas SCADA."
+    },
+    cultura: {
+      guideTitle: "Guía de Convivencia y Pedagógica #BogotáModoMetro"
+    }
+  },
+  en: {
+    app: {
+      titleSlogan: "UrbanGo - Bogotá Metro",
+      slogan: "First Line of Bogotá Metro"
+    },
+    nav: {
+      cultura: "Metro Culture",
+      news: "News & Milestones",
+      jobs: "Jobs & Openings",
+      map: "Interactive Map",
+      cardBalance: "TuLlave Balance",
+      forum: "Citizen Forum"
+    },
+    sidebar_cultura: "Metro Culture",
+    bubbles: {
+      news: "News & Milestones",
+      jobs: "Jobs & Openings",
+      cultura: "Metro Culture",
+      saldo: "TuLlave Balance",
+      map: "Interactive Map",
+      forum: "Citizen Forum",
+      metro2026: "METRO 2026"
+    },
+    newsNav: {
+      newsTab: "Construction News & Milestones",
+      jobsTab: "SENA Jobs & Openings",
+      line1Title: "Line 1 Bogotá Metro",
+      embChannel: "Official EMB Channel"
+    },
+    newsBanner: {
+      officialProgressBadge: "OFFICIAL EMB PHYSICAL PROGRESS",
+      consolidatedCutOff: "CONSOLIDATED CUT-OFF 2026",
+      title: "Overall Viaduct Progress reaches 82.33%",
+      desc: "With 6 launching gantries active across Bosa, Primero de Mayo, and Avenida Caracas fronts, precast segment installation is advancing in record time. At the Bosa Yard & Workshop, automated trains 1 and 2 continue dynamic track testing.",
+      gantriesLabel: "LAUNCHING GANTRIES",
+      gantriesValue: "6 Active",
+      yardLabel: "BOSA YARD & WORKSHOP",
+      yardValue: "91% Completed",
+      interchangeLabel: "72ND ST INTERCHANGE",
+      interchangeValue: "93% Completed",
+      viaductL1: "L1 VIADUCT",
+      stationsFootnote: "16 Stations · 23.9 km Viaduct"
+    },
+    employmentBanner: {
+      officialRecruitmentBadge: "OFFICIAL JOB RECRUITMENT",
+      activeOpeningsBadge: "180+ ACTIVE OPENINGS",
+      title: "Metro Talent & Employment Portal: SENA & Metro Línea 1 S.A.S.",
+      desc: "Concessionaire Metro Línea 1 S.A.S. and SENA Public Employment Agency open direct job openings for operations, maintenance, and commercial commissioning of Bogotá Metro Line 1.",
+      freeNoticeTitle: "100% FREE APPLICATION",
+      freeNoticeDesc: "No person, company, or union charges to apply for these vacancies, nor for medical exams or certifications.",
+      exclusiveChannel: "Exclusive channel: ape.sena.edu.co & Metro Línea 1 S.A.S. Concessionaire",
+      role1Title: "GOA4 DRIVERS",
+      role1Desc: "Supervision and control of 100% automated driverless CBTC trains.",
+      role2Title: "TRACK MAINTENANCE",
+      role2Desc: "Technicians for railway track, overhead catenary, and electrical substations.",
+      role3Title: "CBTC SIGNALING",
+      role3Desc: "Railway telecommunications, TETRA radio, and SCADA systems."
+    },
+    cultura: {
+      guideTitle: "#BogotáModoMetro Citizenship & Mobility Guide"
+    }
+  },
+  pt: {
+    app: {
+      titleSlogan: "UrbanGo - Metrô de Bogotá",
+      slogan: "Primeira Linha do Metrô de Bogotá"
+    },
+    nav: {
+      cultura: "Cultura Metrô",
+      news: "Notícias e Marcos",
+      jobs: "Empregos e Vagas",
+      map: "Mapa Interativo",
+      cardBalance: "Saldo TuLlave",
+      forum: "Fórum Cidadão"
+    },
+    sidebar_cultura: "Cultura Metrô",
+    bubbles: {
+      news: "Notícias e Marcos",
+      jobs: "Empregos e Vagas",
+      cultura: "Cultura Metrô",
+      saldo: "Saldo TuLlave",
+      map: "Mapa Interativo",
+      forum: "Fórum Cidadão",
+      metro2026: "METRÔ 2026"
+    },
+    newsNav: {
+      newsTab: "Notícias e Marcos da Obra",
+      jobsTab: "Empregos e Vagas SENA",
+      line1Title: "Linha 1 Metrô Bogotá",
+      embChannel: "Canal Oficial EMB"
+    },
+    newsBanner: {
+      officialProgressBadge: "AVANÇO FÍSICO OFICIAL EMB",
+      consolidatedCutOff: "CORTE CONSOLIDADO 2026",
+      title: "Avanço Geral do Viaduto atinge 82,33%",
+      desc: "Com 6 vigas lançadeiras ativas nas frentes de Bosa, Primero de Mayo e Avenida Caracas, a instalação de aduelas pré-moldadas avança em tempo recorde. No Pátio Oficina de Bosa, os trens automáticos 1 e 2 continuam os testes dinâmicos na via.",
+      gantriesLabel: "VIGAS LANÇADEIRAS",
+      gantriesValue: "6 Ativas",
+      yardLabel: "PÁTIO OFICINA BOSA",
+      yardValue: "91% Executado",
+      interchangeLabel: "INTERCAMBIADOR CLL 72",
+      interchangeValue: "93% Concluído",
+      viaductL1: "VIADUTO L1",
+      stationsFootnote: "16 Estações · 23.9 km Viaduto"
+    },
+    employmentBanner: {
+      officialRecruitmentBadge: "CONVOCAÇÃO DE EMPREGO OFICIAL",
+      activeOpeningsBadge: "180+ VAGAS ATIVAS",
+      title: "Portal de Emprego e Talentos Metrô: SENA & Metro Línea 1 S.A.S.",
+      desc: "A concessionária Metro Línea 1 S.A.S. e a Agência Pública de Emprego do SENA abrem processos seletivos diretos para a operação, manutenção e início comercial da Linha 1 do Metrô de Bogotá.",
+      freeNoticeTitle: "INSCRIÇÃO 100% GRATUITA",
+      freeNoticeDesc: "Nenhuma pessoa, empresa ou sindicato cobra para se candidatar a essas vagas, nem por exames médicos ou certificações.",
+      exclusiveChannel: "Canal exclusivo: ape.sena.edu.co & Concessionária Metro Línea 1 S.A.S.",
+      role1Title: "CONDUTORES GOA4",
+      role1Desc: "Supervisão e controle de trens 100% automatizados sem maquinista CBTC.",
+      role2Title: "MANUTENÇÃO DE VIA",
+      role2Desc: "Técnicos de ferrovia, catenária aérea e subestações elétricas.",
+      role3Title: "SINALIZAÇÃO CBTC",
+      role3Desc: "Telecomunicações ferroviárias, rádio TETRA e sistemas SCADA."
+    },
+    cultura: {
+      guideTitle: "Guia Pedagógico e de Convivência #BogotáModoMetro"
+    }
+  },
+  zh: {
+    app: {
+      titleSlogan: "UrbanGo - 波哥大地铁",
+      slogan: "波哥大地铁一号线官方平台"
+    },
+    nav: {
+      cultura: "地铁文化",
+      news: "新闻与里程碑",
+      jobs: "招聘与岗位",
+      map: "互动地图",
+      cardBalance: "TuLlave 余额",
+      forum: "市民论坛"
+    },
+    sidebar_cultura: "地铁文化",
+    bubbles: {
+      news: "新闻与里程碑",
+      jobs: "招聘与岗位",
+      cultura: "地铁文化",
+      saldo: "TuLlave 余额",
+      map: "互动地图",
+      forum: "市民论坛",
+      metro2026: "地铁 2026"
+    },
+    newsNav: {
+      newsTab: "工程新闻与里程碑",
+      jobsTab: "SENA 招聘与岗位",
+      line1Title: "波哥大地铁一号线",
+      embChannel: "EMB 官方发布渠道"
+    },
+    newsBanner: {
+      officialProgressBadge: "波哥大地铁公司 (EMB) 官方工程进度",
+      consolidatedCutOff: "2026年综合统计截点",
+      title: "高架桥主体工程综合进度达到 82.33%",
+      desc: "在博萨 (Bosa)、五月一日大道 (Primero de Mayo) 及加拉加斯大道 (Avenida Caracas) 等施工工区，6台架桥机同步全速运转，预制节段梁拼装效率创下历史新高。在博萨车辆段，1号与2号全自动无人驾驶列车正按计划持续进行正线轨道动态测试。",
+      gantriesLabel: "架桥机运作",
+      gantriesValue: "6台活跃中",
+      yardLabel: "博萨车辆段",
+      yardValue: "完成度 91%",
+      interchangeLabel: "72街地下立交",
+      interchangeValue: "完成度 93%",
+      viaductL1: "一号线高架桥",
+      stationsFootnote: "16座车站 · 23.9公里高架桥"
+    },
+    employmentBanner: {
+      officialRecruitmentBadge: "官方招聘通告",
+      activeOpeningsBadge: "180+ 在招岗位",
+      title: "地铁人才与就业招聘门户：SENA 与波哥大地铁一号线责任有限公司",
+      desc: "波哥大地铁一号线特许经营公司与哥伦比亚国家学习服务局 (SENA) 公共就业局联合启动全线直聘通告，面向波哥大地铁一号线的试运营、系统维护和正式商业运营储备专业人才。",
+      freeNoticeTitle: "报名应聘 100% 完全免费",
+      freeNoticeDesc: "任何个人、中介机构或工会均不得在应聘过程中收取任何费用，亦不得就入职体检或技能培训索要任何款项。",
+      exclusiveChannel: "唯一官方通道：ape.sena.edu.co 与波哥大地铁一号线特许经营公司",
+      role1Title: "GoA4全自动列车司机/调控员",
+      role1Desc: "基于CBTC列车控制系统，对全自动无人驾驶列车进行日常运行监控与应急调度。",
+      role2Title: "轨道与接触网维护工",
+      role2Desc: "负责铁道钢轨、刚性接触网及高压牵引变电所的巡检、测量与预防性维护。",
+      role3Title: "CBTC信号与调度工程师",
+      role3Desc: "负责铁路专用通信网络、TETRA数字集群无线电及SCADA综合监控系统管理。"
+    },
+    cultura: {
+      guideTitle: "#BogotáModoMetro 文明乘车与出行指南"
+    }
+  }
+};
+
+for (const [langKey, data] of Object.entries(__URBANGO_I18N_V4)) {
+  const upperKey = langKey.toUpperCase();
+  [langKey, upperKey].forEach(k => {
+    if (translations[k]) {
+      translations[k].app = { ...(translations[k].app || {}), ...data.app };
+      translations[k].nav = { ...(translations[k].nav || {}), ...data.nav };
+      translations[k].sidebar_cultura = data.sidebar_cultura;
+      translations[k].bubbles = { ...(translations[k].bubbles || {}), ...data.bubbles };
+      translations[k].newsNav = { ...(translations[k].newsNav || {}), ...data.newsNav };
+      translations[k].newsBanner = { ...(translations[k].newsBanner || {}), ...data.newsBanner };
+      translations[k].employmentBanner = { ...(translations[k].employmentBanner || {}), ...data.employmentBanner };
+      translations[k].cultura = { ...(translations[k].cultura || {}), ...data.cultura };
+    }
+  });
+}
+
 export default translations;

@@ -55,21 +55,21 @@ export const EmploymentModule = ({
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#800020] text-[#FFF8E7] text-[10px] font-black uppercase tracking-wider shadow-sm">
               <Briefcase size={12} />
-              <span>Convocatoria Laboral Oficial</span>
+              <span>{t('employmentBanner.officialRecruitmentBadge', 'CONVOCATORIA LABORAL OFICIAL')}</span>
             </div>
             <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
               <ShieldCheck size={13} />
-              <span>180+ Vacantes Activas</span>
+              <span>{t('employmentBanner.activeOpeningsBadge', '180+ VACANTES ACTIVAS')}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             <div className="md:col-span-8 space-y-2.5">
               <h1 className={`text-2xl sm:text-3xl font-black italic tracking-tight leading-tight ${dark ? 'text-white' : 'text-[#800020]'}`}>
-                Portal de Empleo y Talento Metro: <span className="text-[#800020] dark:text-red-400">SENA & Metro Línea 1 S.A.S.</span>
+                {t('employmentBanner.title', 'Portal de Empleo y Talento Metro: SENA & Metro Línea 1 S.A.S.')}
               </h1>
               <p className={`text-xs sm:text-sm font-medium leading-relaxed ${dark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                El concesionario Metro Línea 1 S.A.S. y la Agencia Pública de Empleo del SENA abren convocatorias laborales directas para la operación, mantenimiento y puesta en marcha comercial de la Primera Línea del Metro de Bogotá.
+                {t('employmentBanner.desc', 'El concesionario Metro Línea 1 S.A.S. y la Agencia Pública de Empleo del SENA abren convocatorias laborales directas para la operación, mantenimiento y puesta en marcha comercial de la Primera Línea del Metro de Bogotá.')}
               </p>
 
               {/* Roles operativos prioritarios requeridos */}
@@ -78,11 +78,11 @@ export const EmploymentModule = ({
                   <div className="flex items-center gap-2 mb-1">
                     <Train size={16} className="text-[#800020] dark:text-red-400" />
                     <span className="text-[10px] font-black uppercase text-[#800020] dark:text-white">
-                      Conductores GoA4
+                      {t('employmentBanner.role1Title', 'CONDUCTORES GOA4')}
                     </span>
                   </div>
                   <p className={`text-[10.5px] leading-snug ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    Supervisión y control de trenes 100% automatizados sin conductor CBTC.
+                    {t('employmentBanner.role1Desc', 'Supervisión y control de trenes 100% automatizados sin conductor CBTC.')}
                   </p>
                 </div>
 
@@ -90,11 +90,11 @@ export const EmploymentModule = ({
                   <div className="flex items-center gap-2 mb-1">
                     <Wrench size={16} className="text-[#800020] dark:text-red-400" />
                     <span className="text-[10px] font-black uppercase text-[#800020] dark:text-white">
-                      Mantenimiento Vía
+                      {t('employmentBanner.role2Title', 'MANTENIMIENTO VÍA')}
                     </span>
                   </div>
                   <p className={`text-[10.5px] leading-snug ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    Técnicos de vía férrea, catenaria aérea y subestaciones eléctricas.
+                    {t('employmentBanner.role2Desc', 'Técnicos de vía férrea, catenaria aérea y subestaciones eléctricas.')}
                   </p>
                 </div>
 
@@ -102,11 +102,11 @@ export const EmploymentModule = ({
                   <div className="flex items-center gap-2 mb-1">
                     <Radio size={16} className="text-[#800020] dark:text-red-400" />
                     <span className="text-[10px] font-black uppercase text-[#800020] dark:text-white">
-                      Señalización CBTC
+                      {t('employmentBanner.role3Title', 'SEÑALIZACIÓN CBTC')}
                     </span>
                   </div>
                   <p className={`text-[10.5px] leading-snug ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    Telecomunicaciones ferroviarias, radio TETRA y sistemas SCADA.
+                    {t('employmentBanner.role3Desc', 'Telecomunicaciones ferroviarias, radio TETRA y sistemas SCADA.')}
                   </p>
                 </div>
               </div>
@@ -120,15 +120,15 @@ export const EmploymentModule = ({
                 <AlertCircle size={20} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs font-black uppercase tracking-wider mb-1">
-                    Postulación 100% Gratuita
+                    {t('employmentBanner.freeNoticeTitle', 'POSTULACIÓN 100% GRATUITA')}
                   </h4>
                   <p className="text-[11px] leading-relaxed">
-                    Ninguna persona, empresa o sindicato cobra por aplicar a estas vacantes ni por exámenes médicos o certificaciones.
+                    {t('employmentBanner.freeNoticeDesc', 'Ninguna persona, empresa o sindicato cobra por aplicar a estas vacantes ni por exámenes médicos o certificaciones.')}
                   </p>
                 </div>
               </div>
               <div className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 p-2 rounded-xl border border-amber-500/20">
-                Canal exclusivo: ape.sena.edu.co & Concesionario Metro Línea 1 S.A.S.
+                {t('employmentBanner.exclusiveChannel', 'Canal exclusivo: ape.sena.edu.co & Concesionario Metro Línea 1 S.A.S.')}
               </div>
             </div>
           </div>

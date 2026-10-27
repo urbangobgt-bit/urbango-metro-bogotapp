@@ -16,10 +16,10 @@ import {
   Layers
 } from 'lucide-react';
 import { useI18n } from '../i18nContext';
-import { NEWS_DATABASE } from '../data/newsData';
+import { NEWS_DATABASE, getLocalizedNews } from '../data/newsData';
 
 // Re-export for any modules relying on NewsFeed export
-export { NEWS_DATABASE };
+export { NEWS_DATABASE, getLocalizedNews };
 
 const CATEGORY_MAP = {
   todas: { label: 'Todas', labelEn: 'All' },
@@ -41,6 +41,9 @@ export const NewsFeed = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Dynamic news list 100% localized to active language
+  const allNews = useMemo(() => getLocalizedNews(lang), [lang]);
+
   // Trigger skeleton loader briefly on category change or search for polished feeling
   useEffect(() => {
     setIsLoading(true);
@@ -52,9 +55,9 @@ export const NewsFeed = ({
 
   const categories = ['todas', 'obras', 'sostenibilidad', 'licitaciones', 'empleo_cultura'];
 
-  // Filtered and Searched items
+  // Filtered and Searched items from localized list
   const filteredNews = useMemo(() => {
-    return NEWS_DATABASE.filter(item => {
+    return allNews.filter(item => {
       const matchCategory = selectedCategory === 'todas' || 
         item.category === selectedCategory || 
         item.categoryKey === selectedCategory;
@@ -76,7 +79,7 @@ export const NewsFeed = ({
         cat.includes(q)
       );
     });
-  }, [selectedCategory, searchQuery]);
+  }, [allNews, selectedCategory, searchQuery]);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-500">
@@ -152,8 +155,8 @@ export const NewsFeed = ({
                   : dark ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-100 text-zinc-500'
               }`}>
                 {catKey === 'todas' 
-                  ? NEWS_DATABASE.length 
-                  : NEWS_DATABASE.filter(n => n.category === catKey).length
+                  ? allNews.length 
+                  : allNews.filter(n => n.category === catKey).length
                 }
               </span>
             </button>
@@ -189,16 +192,18 @@ export const NewsFeed = ({
           <div className="w-12 h-12 rounded-full bg-red-500/10 text-[#B30000] flex items-center justify-center mx-auto mb-3 text-2xl">
             📰
           </div>
-          <h3 className="font-black text-base uppercase tracking-wider">No se encontraron noticias</h3>
+          <h3 className="font-black text-base uppercase tracking-wider">
+            {lang === 'zh' ? '未找到相关新闻' : lang === 'en' ? 'No news found' : lang === 'pt' ? 'Nenhuma notícia encontrada' : 'No se encontraron noticias'}
+          </h3>
           <p className="text-xs mt-1 max-w-sm mx-auto">
-            Prueba ajustando los términos de búsqueda o seleccionando la categoría "Todas".
+            {lang === 'zh' ? '尝试调整搜索关键词或选择"全部"分类。' : lang === 'en' ? "Try adjusting your search terms or select the 'All' category." : lang === 'pt' ? "Tente ajustar os termos de pesquisa ou selecionar a categoria 'Todas'." : 'Prueba ajustando los términos de búsqueda o seleccionando la categoría "Todas".'}
           </p>
           <button
             type="button"
             onClick={() => { setSelectedCategory('todas'); setSearchQuery(''); }}
             className="mt-4 px-4 py-2 rounded-xl bg-[#B30000] text-white text-xs font-black uppercase tracking-wider hover:bg-[#960000] transition-colors"
           >
-            Restablecer Filtros
+            {lang === 'zh' ? '重置筛选条件' : lang === 'en' ? 'Reset Filters' : lang === 'pt' ? 'Redefinir Filtros' : 'Restablecer Filtros'}
           </button>
         </div>
       ) : (
@@ -279,14 +284,16 @@ export const NewsFeed = ({
                     {/* Categoría & Tiempo */}
                     <div className="flex items-center justify-between gap-2">
                       <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${catBadge.color}`}>
-                        {news.category === 'obras' ? t('newsModule.catWorks', 'Obras y Avance') :
-                         news.category === 'sostenibilidad' ? t('newsModule.catSustainability', 'Sostenibilidad') :
-                         news.category === 'licitaciones' ? t('newsModule.catTenders', 'Licitaciones') :
-                         t('newsModule.catJobsCulture', 'Empleo y Cultura')}
+                        {news.categoryLabel || (
+                          news.category === 'obras' ? t('newsModule.catWorks', 'Obras y Avance') :
+                          news.category === 'sostenibilidad' ? t('newsModule.catSustainability', 'Sostenibilidad') :
+                          news.category === 'licitaciones' ? t('newsModule.catTenders', 'Licitaciones') :
+                          t('newsModule.catJobsCulture', 'Empleo y Cultura')
+                        )}
                       </span>
                       <div className="flex items-center gap-1 text-[10px] font-medium text-zinc-400">
                         <Clock size={11} />
-                        <span>{news.readMin} {t('newsModule.minRead', 'min lectura')}</span>
+                        <span>{news.readTime || `${news.readMin} ${t('newsModule.minRead', 'min lectura')}`}</span>
                       </div>
                     </div>
 
@@ -311,7 +318,7 @@ export const NewsFeed = ({
                     </div>
 
                     <div className="flex items-center gap-1 text-[#B30000] font-black uppercase tracking-wider group-hover:translate-x-0.5 transition-transform">
-                      <span>{t('newsModule.readMore', 'Leer Más')}</span>
+                      <span>{news.readMore || t('newsModule.readMore', 'Leer artículo completo')}</span>
                       <ChevronRight size={13} />
                     </div>
                   </div>

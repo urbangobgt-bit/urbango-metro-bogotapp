@@ -2232,8 +2232,52 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
   // - "[Lugar] estación de Metro"
   // ==========================================================================
 
+  const l = (effectiveLang || 'ES').toUpperCase();
+
   // 1. MULTIPLAZA / PLAZA CENTRAL (Av. Boyacá / Calle 13)
   if (query.includes('multiplaza') || query.includes('plaza central')) {
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`🏬 **地铁接驳指南: Multiplaza 购物中心与 Plaza Central (Av. Boyacá 与 Calle 13 交汇处):**
+
+• **最邻近的地铁一号线核心车站:**
+  - **第5站 (Av. Primero de Mayo 与 Av. Boyacá)** 及 **第6站 (Av. Primero de Mayo 与 Cra 50 / Av. 68)**。
+
+• **公共交通多式联运 (SITP / TransMilenio):**
+  - 在第5站或第6站下车，换乘沿 Av. Boyacá 走廊向北行驶的 SITP 区域巴士至 Calle 13（使用 TuLlave 交通卡在 110 分钟优惠期内享受 **1次 $0 COP 免费换乘**）。
+
+💡 **#BogotáModoMetro 文明乘车贴士 / TuLlave 交通卡:**
+  - 持实名 TuLlave 交通卡，可在 110 分钟内享受 $0 COP 换乘。候车时请站在屏蔽门两侧，先下后上，确保车门区域通行顺畅。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`🏬 **Metro Connection: Multiplaza & Plaza Central (Av. Boyacá with Calle 13):**
+
+• **Nearest Key Metro Line 1 Stations:**
+  - **Station 5 (Av. Primero de Mayo with Av. Boyacá)** and **Station 6 (Av. Primero de Mayo with Cra 50 / Av. 68)**.
+
+• **Intermodal Connection (SITP / TransMilenio):**
+  - Alight at Station 5 or 6 and take an SITP Zonal bus northward along Av. Boyacá corridor to Calle 13 (**1 transfer at $0 COP** using your TuLlave card within the 110-minute window).
+
+💡 **#BogotáModoMetro Tip / TuLlave Card:**
+  - With your personalized TuLlave card, you have 110 minutes for $0 COP transfers. Stand beside the PSD platform screen doors to allow smooth boarding.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`🏬 **Conexão Metrô: Multiplaza & Plaza Central (Av. Boyacá com Calle 13):**
+
+• **Estações-chave da Linha 1 mais próximas:**
+  - **Estação 5 (Av. Primero de Mayo com Av. Boyacá)** e **Estação 6 (Av. Primero de Mayo com Cra 50 / Av. 68)**.
+
+• **Conexão Intermodal (SITP / TransMilenio):**
+  - Desembarque na Estação 5 ou 6 e pegue ônibus SITP Zonal sentido norte pelo corredor da Av. Boyacá até a Calle 13 (**1 baldeação a $0 COP** com cartão TuLlave na janela de 110 minutos).
+
+💡 **Dica #BogotáModoMetro / Cartão TuLlave:**
+  - Com seu cartão TuLlave personalizado você tem 110 minutos para baldeações a $0 COP. Aguarde ao lado das portas de plataforma PSD permitindo o desembarque antes de embarcar.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`🏬 **Conexión Metro: Multiplaza & Plaza Central (Av. Boyacá con Calle 13):**
 
 • **Estación de Metro clave más cercana:**
@@ -2250,6 +2294,48 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
 
   // 2. CENTRO MAYOR (Autopista Sur con Cll 38A Sur)
   if (query.includes('centro mayor') || query.includes('centromayor')) {
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`🏬 **地铁接驳指南: Centro Mayor 购物中心 (Autopista Sur 与 Calle 38A Sur):**
+
+• **最邻近的地铁一号线核心车站:**
+  - **第8站 (NQS 与 Calle 8 Sur 交汇处)** 或 **第3站 (Av. Boyacá)**（亦可在第9站 General Santander 枢纽接驳）。
+
+• **多式联运 (SITP / TransMilenio):**
+  - 直接接驳南向 NQS 快速公交走廊或南向高速公路区域巴士（**1次 $0 COP 免费换乘**），General Santander 站更有直达商场的带顶风雨连廊步道。
+
+💡 **#BogotáModoMetro 文明乘车贴士:**
+  - 乘车请主动为老人、孕妇和行动不便者让座，礼貌互助，共建文明地铁。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`🏬 **Metro Connection: Centro Mayor Shopping Mall (Autopista Sur with Calle 38A Sur):**
+
+• **Nearest Key Metro Line 1 Stations:**
+  - **Station 8 (NQS with Calle 8 Sur)** or **Station 3 (Av. Boyacá)** (also accessible via Station 9 General Santander).
+
+• **Intermodal Connection (SITP / TransMilenio):**
+  - Direct connection to Trunk NQS South or zonal bus along Autopista Sur (**1 transfer at $0 COP**). Features a direct covered pedestrian walkway to the mall from General Santander station.
+
+💡 **#BogotáModoMetro Tip:**
+  - Offer priority seats to seniors, pregnant women, and passengers with reduced mobility.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`🏬 **Conexão Metrô: Shopping Centro Mayor (Autopista Sur com Calle 38A Sur):**
+
+• **Estações-chave da Linha 1 mais próximas:**
+  - **Estação 8 (NQS com Calle 8 Sur)** ou **Estação 3 (Av. Boyacá)** (também acessível pela Estação 9 General Santander).
+
+• **Conexão Intermodal (SITP / TransMilenio):**
+  - Conexão direta com a Troncal NQS Sul ou ônibus zonal pela Autopista Sur (**1 baldeação a $0 COP**). Conta com passarela coberta direta até o shopping a partir da estação General Santander.
+
+💡 **Dica #BogotáModoMetro:**
+  - Ceda o assento prioritário a idosos, gestantes e pessoas com deficiência.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`🏬 **Conexión Metro: C.C. Centro Mayor (Autopista Sur con Calle 38A Sur):**
 
 • **Estación de Metro clave más cercana:**
@@ -2279,11 +2365,11 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
     let connDetail = 'Troncal Norte, Carrera 15, Av. Suba o Av. Boyacá en SITP/TransMilenio (1 transbordo a $0 COP en 110 minutos).';
 
     if (query.includes('unicentro')) {
-      poiTitle = 'C.C. Unicentro (Carrera 15 con Calle 127)';
-      connDetail = 'Desde Estación 16 toma bus Zonal/SITP por la Carrera 15 norte o Troncal Norte hasta Calle 127 (1 transbordo a $0 COP).';
+      poiTitle = l === 'ZH' ? 'Unicentro 购物中心 (Carrera 15 与 Calle 127)' : l === 'EN' ? 'Unicentro Mall (Carrera 15 with Calle 127)' : l === 'PT' ? 'Shopping Unicentro (Carrera 15 com Calle 127)' : 'C.C. Unicentro (Carrera 15 con Calle 127)';
+      connDetail = l === 'ZH' ? '从第16站搭乘沿 Carrera 15 向北的 SITP 区域巴士或北部快速公交干线至 Calle 127（1次 $0 COP 免费换乘）。' : l === 'EN' ? 'From Station 16 take an SITP zonal bus north along Carrera 15 or Trunk North to Calle 127 (1 transfer at $0 COP).' : 'Desde Estación 16 toma bus Zonal/SITP por la Carrera 15 norte o Troncal Norte hasta Calle 127 (1 transbordo a $0 COP).';
     } else if (query.includes('titan') || query.includes('titán')) {
-      poiTitle = 'C.C. Titán Plaza (Av. Boyacá con Calle 80)';
-      connDetail = 'Desde Estación 16 conecta con Troncal Calle 80 hacia el occidente o bus zonal por la Av. Boyacá norte (1 transbordo a $0 COP).';
+      poiTitle = l === 'ZH' ? 'Titán Plaza 购物中心 (Av. Boyacá 与 Calle 80)' : l === 'EN' ? 'Titán Plaza Mall (Av. Boyacá with Calle 80)' : 'C.C. Titán Plaza (Av. Boyacá con Calle 80)';
+      connDetail = l === 'ZH' ? '从第16站换乘 80 街快速公交干线往西或沿 Av. Boyacá 向北的区域巴士（1次 $0 COP 免费换乘）。' : 'Desde Estación 16 conecta con Troncal Calle 80 hacia el occidente o bus zonal por la Av. Boyacá norte (1 transbordo a $0 COP).';
     } else if (query.includes('colina')) {
       poiTitle = 'C.C. Parque La Colina (Av. Boyacá con Calle 146B)';
       connDetail = 'Desde Estación 16 toma Troncal Norte hacia Portal Norte o bus zonal por Av. Suba / Av. Boyacá (1 transbordo a $0 COP).';
@@ -2292,6 +2378,48 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
       connDetail = 'Desde Estación 16 conecta con Troncal Norte en servicio expreso hacia Portal Norte (1 transbordo a $0 COP).';
     }
 
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`🏬 **地铁接驳指南: ${poiTitle}:**
+
+• **最邻近的地铁一号线核心车站:**
+  - **第16站 (Calle 72 与 Av. Caracas 交汇处 / 北部多式联运地下立交枢纽)**。
+
+• **多式联运 (SITP / TransMilenio):**
+  - ${connDetail}
+
+💡 **#BogotáModoMetro 文明乘车贴士:**
+  - 提前为 TuLlave 交通卡充值，在站台屏蔽门前依序排队，先下后上安全乘车。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`🏬 **Metro Connection: ${poiTitle}:**
+
+• **Nearest Key Metro Line 1 Station:**
+  - **Station 16 (Calle 72 with Av. Caracas / Northern Modal Hub)**.
+
+• **Intermodal Connection (SITP / TransMilenio):**
+  - ${connDetail}
+
+💡 **#BogotáModoMetro Tip:**
+  - Keep your TuLlave card loaded ahead of time and line up orderly at PSD platform screen doors.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`🏬 **Conexão Metrô: ${poiTitle}:**
+
+• **Estação-chave mais próxima:**
+  - **Estação 16 (Calle 72 com Av. Caracas / Hub Modal do Norte)**.
+
+• **Conexão Intermodal (SITP / TransMilenio):**
+  - ${connDetail}
+
+💡 **Dica #BogotáModoMetro:**
+  - Mantenha seu cartão TuLlave recarregado e faça a fila de forma ordenada nas portas PSD.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`🏬 **Conexión Metro: ${poiTitle}:**
 
 • **Estación de Metro clave más cercana:**
@@ -2308,6 +2436,48 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
 
   // 4. MOVISTAR ARENA / ESTADIO EL CAMPÍN
   if (query.includes('movistar') || query.includes('campin') || query.includes('campín')) {
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`🏟️ **地铁接驳指南: Movistar Arena 室内体育馆与 El Campín 足球场:**
+
+• **最邻近的地铁一号线核心车站:**
+  - **第15站 (Av. Caracas 与 Calle 63 交汇处)** 或 **第16站 (Calle 72)**。
+
+• **公共交通多式联运 (SITP / TransMilenio):**
+  - 直接接驳 NQS 快速公交走廊（Campín - U. Antonio Nariño / Movistar Arena 站）或沿 Calle 53/63 乘坐区域巴士（**1次 $0 COP 免费换乘**）。
+
+💡 **#BogotáModoMetro 文明乘车贴士:**
+  - 大型文体活动客流集中时，请依序排队，车厢内严禁饮食，以城市主人翁精神文明乘车。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`🏟️ **Metro Connection: Movistar Arena & El Campín Stadium:**
+
+• **Nearest Key Metro Line 1 Station:**
+  - **Station 15 (Av. Caracas with Calle 63)** or **Station 16 (Calle 72)**.
+
+• **Intermodal Connection (SITP / TransMilenio):**
+  - Direct connection to Trunk NQS (Campín - U. Antonio Nariño / Movistar Arena station) or zonal bus along Calle 53/63 (**1 transfer at $0 COP**).
+
+💡 **#BogotáModoMetro Tip:**
+  - During mass cultural and sporting events, queue patiently, avoid eating inside train cars, and validate with pride.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`🏟️ **Conexão Metrô: Movistar Arena & Estádio El Campín:**
+
+• **Estação-chave mais próxima:**
+  - **Estação 15 (Av. Caracas com Calle 63)** ou **Estação 16 (Calle 72)**.
+
+• **Conexão Intermodal (SITP / TransMilenio):**
+  - Integração direta com a Troncal NQS (Estação Campín / Movistar Arena) ou ônibus zonal pelas Calles 53/63 (**1 baldeação a $0 COP**).
+
+💡 **Dica #BogotáModoMetro:**
+  - Em grandes eventos, faça a fila com calma, não coma dentro dos vagões e valide sua passagem com respeito cidadão.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`🏟️ **Conexión Metro: Movistar Arena & Estadio El Campín:**
 
 • **Estación de Metro clave más cercana:**
@@ -2334,11 +2504,53 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
   ) {
     let uniDetail = 'Caminata peatonal directa o enlace por Carrera 7 / Calle 45 con transbordo a $0 COP.';
     if (query.includes('unal') || query.includes('nacional')) {
-      uniDetail = 'Pasarela peatonal directa desde Estación 14 o Estación 13 hacia el campus de la Universidad Nacional (caminata de 5 minutos).';
+      uniDetail = l === 'ZH' ? '从第14站或第13站设有直通哥伦比亚国立大学 (UNAL) 校区的步行风雨连廊（步行约5分钟）。' : l === 'EN' ? 'Direct pedestrian walkway from Station 14 or Station 13 to National University (UNAL) campus (5-minute walk).' : 'Pasarela peatonal directa desde Estación 14 o Estación 13 hacia el campus de la Universidad Nacional (caminata de 5 minutos).';
     } else if (query.includes('javeriana') || query.includes('distrital') || query.includes('catolica') || query.includes('católica')) {
-      uniDetail = 'Caminata de 5 minutos al oriente por la Calle 45 o enlace con buses zonales de la Carrera 7ma (transbordo a $0 COP).';
+      uniDetail = l === 'ZH' ? '沿 Calle 45 向东步行5分钟或换乘 Carrera 7 区域巴士（1次 $0 COP 免费换乘）。' : l === 'EN' ? '5-minute walk east along Calle 45 or connection with Carrera 7 zonal buses (1 transfer at $0 COP).' : 'Caminata de 5 minutos al oriente por la Calle 45 o enlace con buses zonales de la Carrera 7ma (transbordo a $0 COP).';
     }
 
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`🎓 **地铁接驳指南: 高校大学城片区 (UNAL / Javeriana / Distrital / Católica):**
+
+• **最邻近的地铁一号线核心车站:**
+  - **第14站 (Av. Caracas 与 Calle 45 交汇处)** 及 **第15站 (Calle 63)**（前往国立大学亦可在 **第13站 Calle 26** 出闸）。
+
+• **多式联运 (SITP / TransMilenio):**
+  - ${uniDetail}
+
+💡 **#BogotáModoMetro 文明乘车贴士:**
+  - 候车礼让弱势群体，保持站台有序排队，青年学生的文明素养是 #BogotáModoMetro 的重要示范。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`🎓 **Metro Connection: University Corridor (UNAL / Javeriana / Distrital / Católica):**
+
+• **Nearest Key Metro Line 1 Stations:**
+  - **Station 14 (Av. Caracas with Calle 45)** and **Station 15 (Calle 63)** (for UNAL also **Station 13 Calle 26**).
+
+• **Intermodal Connection (SITP / TransMilenio):**
+  - ${uniDetail}
+
+💡 **#BogotáModoMetro Tip:**
+  - Respect boarding platforms and give way to passengers with reduced mobility.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`🎓 **Conexão Metrô: Eixo Universitário (UNAL / Javeriana / Distrital / Católica):**
+
+• **Estações-chave da Linha 1 mais próximas:**
+  - **Estação 14 (Av. Caracas com Calle 45)** e **Estação 15 (Calle 63)** (para a UNAL também **Estação 13 Calle 26**).
+
+• **Conexão Intermodal (SITP / TransMilenio):**
+  - ${uniDetail}
+
+💡 **Dica #BogotáModoMetro:**
+  - Respeite as plataformas de embarque e dê passagem a quem precisa.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`🎓 **Conexión Metro: Eje Universitario (UNAL / Javeriana / Distrital / Católica):**
 
 • **Estación de Metro clave más cercana:**
@@ -2367,20 +2579,60 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
     query.includes('jardín botánico') || 
     query.includes('can')
   ) {
-    let placeTitle = 'Aeropuerto El Dorado / Corferias / Simón Bolívar';
-    let placeConn = 'Transbordo directo a Troncal Calle 26 (Ruta K16/K60 en bus dual o articulado) o Av. La Esperanza (1 transbordo a $0 COP).';
-
     if (query.includes('aeropuerto') || query.includes('el dorado') || query.includes('eldorado')) {
-      placeTitle = 'Aeropuerto Internacional El Dorado';
-      placeConn = 'Transbordo directo en Estación 13 a Troncal Calle 26 abordando la ruta K60 o alimentador K16 en bus dual/articulado directo al Terminal Aéreo (1 transbordo a $0 COP).';
-    } else if (query.includes('corferias') || query.includes('agora') || query.includes('ágora') || query.includes('can')) {
-      placeTitle = 'Corferias / Ágora Bogotá / CAN';
-      placeConn = 'Conexión sobre Troncal Calle 26 hacia CAD/Corferias o bus zonal por Av. La Esperanza (1 transbordo a $0 COP).';
-    } else if (query.includes('simon bolivar') || query.includes('simón bolívar') || query.includes('jardin botanico') || query.includes('jardín botánico')) {
-      placeTitle = 'Parque Metropolitano Simón Bolívar & Jardín Botánico';
-      placeConn = 'Toma bus zonal SITP por Calle 53 o Calle 63 al occidente hacia Carrera 68 (1 transbordo a $0 COP).';
+      return ensureSuggestionsBlock(formatAirportRoute(effectiveLang), effectiveLang);
     }
 
+    let placeTitle = 'Corferias / Ágora Bogotá / CAN';
+    let placeConn = 'Conexión sobre Troncal Calle 26 hacia CAD/Corferias o bus zonal por Av. La Esperanza (1 transbordo a $0 COP).';
+
+    if (query.includes('simon bolivar') || query.includes('simón bolívar') || query.includes('jardin botanico') || query.includes('jardín botánico')) {
+      placeTitle = l === 'ZH' ? 'Simón Bolívar 都会公园与植物园' : l === 'EN' ? 'Simón Bolívar Metropolitan Park & Botanical Garden' : 'Parque Metropolitano Simón Bolívar & Jardín Botánico';
+      placeConn = l === 'ZH' ? '沿 Calle 53 或 Calle 63 向西乘坐 SITP 区域巴士至 Carrera 68（1次 $0 COP 免费换乘）。' : l === 'EN' ? 'Take an SITP zonal bus along Calle 53 or 63 westbound to Carrera 68 (1 transfer at $0 COP).' : 'Toma bus zonal SITP por Calle 53 o Calle 63 al occidente hacia Carrera 68 (1 transbordo a $0 COP).';
+    }
+
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`✈️ **地铁接驳指南: ${placeTitle}:**
+
+• **最邻近的地铁一号线核心车站:**
+  - **第13站 (Av. Caracas 与 Calle 26 / Av. El Dorado 交汇处)**。
+
+• **多式联运 (SITP / TransMilenio):**
+  - ${placeConn}
+
+💡 **#BogotáModoMetro 文明乘车贴士:**
+  - TuLlave 交通卡享有 110 分钟 $0 COP 换乘优惠，请预留充裕时间规划出行。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`✈️ **Metro Connection: ${placeTitle}:**
+
+• **Nearest Key Metro Line 1 Station:**
+  - **Station 13 (Av. Caracas with Calle 26 / Av. El Dorado)**.
+
+• **Intermodal Connection (SITP / TransMilenio):**
+  - ${placeConn}
+
+💡 **#BogotáModoMetro Tip:**
+  - With your TuLlave card, you have 110 minutes for $0 COP transfers. Plan your journey ahead with ample time.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`✈️ **Conexão Metrô: ${placeTitle}:**
+
+• **Estação-chave mais próxima:**
+  - **Estação 13 (Av. Caracas com Calle 26 / Av. El Dorado)**.
+
+• **Conexão Intermodal (SITP / TransMilenio):**
+  - ${placeConn}
+
+💡 **Dica #BogotáModoMetro:**
+  - Com seu cartão TuLlave você dispõe de 110 minutos para baldeações a $0 COP.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`✈️ **Conexión Metro: ${placeTitle}:**
 
 • **Estación de Metro clave más cercana:**
@@ -2400,6 +2652,36 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
     query.includes('20 localidades') || 
     (query.includes('localidades') && (query.includes('cuales') || query.includes('cuáles') || query.includes('todas') || query.includes('lista') || query.includes('cuantas') || query.includes('cuántas')))
   ) {
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`🧭 **全网覆盖: 波哥大20大行政区接驳体系:**
+• **9个区享有地铁一号线高架桥直通:** Bosa, Kennedy, Puente Aranda, Antonio Nariño, Los Mártires, Santa Fe, Teusaquillo, Barrios Unidos 和 Chapinero (全长23.9公里连续高架)。
+• **4个区享有地铁二号线地下线贯通:** Chapinero, Barrios Unidos, Engativá 和 Suba (11座车站)。
+• **7个区享有 TuLlave $0 COP 多式联运免费换乘接驳:** Fontibón, Usaquén, Tunjuelito, Ciudad Bolívar, San Cristóbal, Rafael Uribe Uribe 及 Sumapaz。
+
+💡 **#BogotáModoMetro 文明贴士:** 在 #BogotáModoMetro 理念下，20大行政区全域互联，共建高效、平等、绿色的城市出行。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`🧭 **Comprehensive Connectivity: All 20 Localities of Bogotá:**
+• **9 Localities directly served by Metro Line 1:** Bosa, Kennedy, Puente Aranda, Antonio Nariño, Los Mártires, Santa Fe, Teusaquillo, Barrios Unidos, and Chapinero (23.9 km elevated viaduct).
+• **4 Localities connected via Underground Line 2:** Chapinero, Barrios Unidos, Engativá, and Suba (11 stations).
+• **7 Localities integrated via TuLlave $0 COP multimodal transfers:** Fontibón, Usaquén, Tunjuelito, Ciudad Bolívar, San Cristóbal, Rafael Uribe Uribe, and Sumapaz.
+
+💡 **#BogotáModoMetro Tip:** In #BogotáModoMetro, all 20 localities connect with civic responsibility and travel equity.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`🧭 **Conectividade Integral: As 20 Localidades de Bogotá:**
+• **9 Localidades atendidas diretamente pela Linha 1:** Bosa, Kennedy, Puente Aranda, Antonio Nariño, Los Mártires, Santa Fe, Teusaquillo, Barrios Unidos e Chapinero (23,9 km de viaduto).
+• **4 Localidades com a Linha 2 Subterrânea:** Chapinero, Barrios Unidos, Engativá e Suba (11 estações).
+• **7 Localidades com integração multimodal TuLlave a $0 COP:** Fontibón, Usaquén, Tunjuelito, Ciudad Bolívar, San Cristóbal, Rafael Uribe Uribe e Sumapaz.
+
+💡 **Dica #BogotáModoMetro:** No #BogotáModoMetro todas as 20 localidades conectam-se com civismo e equidade de tempo.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`🧭 **Conectividad Integral: Las 20 Localidades de Bogotá:**
 • **9 Localidades con trazado directo Línea 1:** Bosa, Kennedy, Puente Aranda, Antonio Nariño, Los Mártires, Santa Fe, Teusaquillo, Barrios Unidos y Chapinero (23,9 km de viaducto).
 • **4 Localidades con Línea 2 Subterránea:** Chapinero, Barrios Unidos, Engativá y Suba (11 estaciones).
@@ -2416,6 +2698,39 @@ Recorrido de **23,9 km** 100% elevado sobre viaducto continuo (10 estaciones int
   );
   if (locEntry) {
     const [locName, loc] = locEntry;
+    if (l === 'ZH') {
+      return ensureSuggestionsBlock(`🧭 **多式联运接驳路线: ${locName} 行政区:**
+• **一号线核心接驳站:** **${loc.conexionMetro}**。
+• **主要接驳走廊:** ${loc.corredoresPrincipales}。
+• **TransMilenio / SITP 接驳服务:** ${loc.transmilenio}。
+• **TuLlave 交通卡换乘:** 享有 110 分钟在公交大巴与地铁高架桥之间 **$0 COP 免费换乘**。
+
+💡 **#BogotáModoMetro 文明贴士:** 站台依序排队，请勿阻挡自动屏蔽门开关。
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'EN') {
+      return ensureSuggestionsBlock(`🧭 **Intermodal Route & Connection: Locality of ${locName}:**
+• **Key Metro Station:** **${loc.conexionMetro}**.
+• **Main Corridors:** ${loc.corredoresPrincipales}.
+• **TransMilenio / SITP Connection:** ${loc.transmilenio}.
+• **TuLlave Window:** 110 minutes for $0 COP transfers between zonal buses and the Metro viaduct.
+
+💡 **#BogotáModoMetro Tip:** Queue orderly on platforms and do not obstruct automatic PSD screen doors.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
+    if (l === 'PT') {
+      return ensureSuggestionsBlock(`🧭 **Rota e Conexão Intermodal: Localidade de ${locName}:**
+• **Estação Metrô Chave:** **${loc.conexionMetro}**.
+• **Corredores Principais:** ${loc.corredoresPrincipales}.
+• **Conexão TransMilenio / SITP:** ${loc.transmilenio}.
+• **Janela TuLlave:** 110 minutos para baldeações a $0 COP entre ônibus zonais e o viaduto do Metrô.
+
+💡 **Dica #BogotáModoMetro:** Respeite a fila e não obstrua as portas de plataforma PSD.
+
+[ACTION: OPEN_MAP_MODULE]`, effectiveLang);
+    }
     return ensureSuggestionsBlock(`🧭 **Ruta y Conexión Intermodal: Localidad de ${locName}:**
 • **Estación Metro Clave:** **${loc.conexionMetro}**.
 • **Corredores Principales:** ${loc.corredoresPrincipales}.

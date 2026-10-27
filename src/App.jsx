@@ -1022,7 +1022,7 @@ export default function App() {
                     </button>
                   )}
                   <div>
-                    <h1 className={`text-lg sm:text-xl font-black italic tracking-tighter leading-none ${dark ? 'text-white' : 'text-zinc-900'}`}>Urban<span className="text-[#B30000]">-go</span></h1>
+                    <h1 className={`text-lg sm:text-xl font-black italic tracking-tighter leading-none ${dark ? 'text-white' : 'text-zinc-900'}`} title={t('app.titleSlogan', 'UrbanGo - Metro de Bogotá')}>Urban<span className="text-[#B30000]">-go</span></h1>
                     <p className={`font-bold mt-0.5 uppercase tracking-widest text-[8px] truncate max-w-[120px] sm:max-w-none ${dark ? 'text-zinc-400' : 'text-zinc-600'}`}>{
   t('dash_hola').replace('{name}', user?.name || 'Ciudadano')
 }</p>
@@ -1502,7 +1502,7 @@ export default function App() {
                   {[
                     { tab: 'dashboard', icon: <Train size={18} />,        label: t('sidebar_inicio') },
                     { tab: 'mapa',      icon: <MapIcon size={18} />,       label: t('sidebar_mapa') },
-                    { tab: 'cultura',   icon: <BookOpen size={18} />,      label: 'Cultura Metro' },
+                    { tab: 'cultura',   icon: <BookOpen size={18} />,      label: t('sidebar_cultura', t('nav.cultura', 'Cultura Metro')) },
                     { tab: 'foro',      icon: <MessageSquare size={18} />, label: t('sidebar_foro') },
                     { tab: 'saldo',     icon: <CreditCard size={18} />,    label: t('saldo_title') },
                     { tab: 'perfil',    icon: <User size={18} />,          label: t('sidebar_perfil') },
@@ -1783,13 +1783,13 @@ export default function App() {
 
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        { id: 'dashboard', label: 'Inicio', desc: 'Resumen L1', icon: <Train size={17} />, color: 'bg-red-500/15 text-red-600 dark:text-red-400' },
-                        { id: 'mapa', label: 'Mapa L1', desc: 'Estaciones', icon: <MapIcon size={17} />, color: 'bg-blue-500/15 text-blue-600 dark:text-blue-400' },
-                        { id: 'cultura', label: 'Cultura Metro', desc: '#BogotáModoMetro', icon: <BookOpen size={17} />, color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
-                        { id: 'foro', label: 'Foro', desc: 'Comunidad', icon: <MessageSquare size={17} />, color: 'bg-purple-500/15 text-purple-600 dark:text-purple-400' },
-                        { id: 'saldo', label: 'TuLlave', desc: 'Saldo y recarga', icon: <CreditCard size={17} />, color: 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400' },
-                        { id: 'incidencia', label: 'Reportar Vial', desc: 'Incidencia en obra', icon: <AlertTriangle size={17} />, color: 'bg-rose-500/15 text-rose-600 dark:text-rose-400', isAction: true },
-                        { id: 'perfil', label: 'Mi Perfil', desc: 'Configuración', icon: <User size={17} />, color: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400' },
+                        { id: 'dashboard', label: t('sidebar_inicio', 'Inicio'), desc: t('dash_resumen', 'Resumen L1'), icon: <Train size={17} />, color: 'bg-red-500/15 text-red-600 dark:text-red-400' },
+                        { id: 'mapa', label: t('bubbles.map', 'Mapa L1'), desc: t('est_title', 'Estaciones'), icon: <MapIcon size={17} />, color: 'bg-blue-500/15 text-blue-600 dark:text-blue-400' },
+                        { id: 'cultura', label: t('bubbles.cultura', 'Cultura Metro'), desc: '#BogotáModoMetro', icon: <BookOpen size={17} />, color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
+                        { id: 'foro', label: t('bubbles.forum', 'Foro'), desc: t('eco_bot_title', 'Comunidad'), icon: <MessageSquare size={17} />, color: 'bg-purple-500/15 text-purple-600 dark:text-purple-400' },
+                        { id: 'saldo', label: t('bubbles.saldo', 'TuLlave'), desc: t('saldoCard.tabBalance', 'Saldo y recarga'), icon: <CreditCard size={17} />, color: 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400' },
+                        { id: 'incidencia', label: t('incidentsModule.btnReport', 'Reportar Vial'), desc: t('incidentsModule.subtitle', 'Incidencia en obra'), icon: <AlertTriangle size={17} />, color: 'bg-rose-500/15 text-rose-600 dark:text-rose-400', isAction: true },
+                        { id: 'perfil', label: t('sidebar_perfil', 'Mi Perfil'), desc: t('dash_config', 'Configuración'), icon: <User size={17} />, color: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400' },
                       ].map(item => {
                         const isActive = !item.isAction && currentTab === item.id;
                         return (
@@ -3717,25 +3717,25 @@ const BubblesHero = ({ onNavigate, dark }) => {
   const [hoveredColor, setHoveredColor] = useState(null);
 
   const nodes = [
-    { tab: 'mapa',     icon: <MapIcon size={18} />,       label: 'Mapa Interactivo', color: 'bg-[#ea580c] text-white', glow: '#ea580c', pos: 'top-[calc(50%-115px)] left-[50%] -translate-x-1/2 -translate-y-1/2' },
+    { tab: 'mapa',     icon: <MapIcon size={18} />,       label: t('bubbles.map', 'Mapa Interactivo'), color: 'bg-[#ea580c] text-white', glow: '#ea580c', pos: 'top-[calc(50%-115px)] left-[50%] -translate-x-1/2 -translate-y-1/2' },
     { 
       tab: 'saldo',   
       icon: <CreditCard size={18} className="text-zinc-950" strokeWidth={2.4} />,  
-      label: 'Saldo de Tarjeta',   
+      label: t('bubbles.saldo', 'Saldo TuLlave'),   
       color: 'bg-yellow-400 text-zinc-950 border-white dark:border-zinc-800 shadow-lg shadow-yellow-500/25', 
       glow: '#EAB308', 
       pos: 'top-[calc(50%-36px)] left-[calc(50%+107px)] -translate-x-1/2 -translate-y-1/2' 
     },
-    { tab: 'noticias', icon: <Newspaper size={18} />,     label: 'Noticias e Hitos',         color: 'bg-[#1565C0] text-white', glow: '#1565C0', pos: 'top-[calc(50%+95px)] left-[calc(50%+66px)] -translate-x-1/2 -translate-y-1/2' },
+    { tab: 'noticias', icon: <Newspaper size={18} />,     label: t('bubbles.news', 'Noticias e Hitos'),         color: 'bg-[#1565C0] text-white', glow: '#1565C0', pos: 'top-[calc(50%+95px)] left-[calc(50%+66px)] -translate-x-1/2 -translate-y-1/2' },
     { 
       tab: 'cultura',   
       icon: <BookOpen size={18} className="text-white" />,     
-      label: 'Cultura #BogotáModoMetro',           
+      label: t('bubbles.cultura', 'Cultura Metro'),           
       color: 'bg-[#107C41] text-white hover:bg-[#0c6233]', 
       glow: '#107C41', 
       pos: 'top-[calc(50%+95px)] left-[calc(50%-66px)] -translate-x-1/2 -translate-y-1/2' 
     },
-    { tab: 'foro',     icon: <MessageSquare size={18} />, label: 'Foro Ciudadano',             color: 'bg-[#6B21A8] text-white', glow: '#6B21A8', pos: 'top-[calc(50%-36px)] left-[calc(50%-107px)] -translate-x-1/2 -translate-y-1/2' },
+    { tab: 'foro',     icon: <MessageSquare size={18} />, label: t('bubbles.forum', 'Foro Ciudadano'),             color: 'bg-[#6B21A8] text-white', glow: '#6B21A8', pos: 'top-[calc(50%-36px)] left-[calc(50%-107px)] -translate-x-1/2 -translate-y-1/2' },
   ];
 
   return (
@@ -3775,7 +3775,7 @@ const BubblesHero = ({ onNavigate, dark }) => {
         onClick={() => onNavigate('mapa')}
       >
         <Train size={42} className="text-white mb-1 animate-pulse" />
-        <span className="text-white font-black text-[13px] tracking-widest text-center leading-tight drop-shadow-md">METRO<br />2026</span>
+        <span className="text-white font-black text-[13px] tracking-widest text-center leading-tight drop-shadow-md whitespace-pre-line">{t('bubbles.metro2026', 'METRO\n2026')}</span>
       </div>
 
       {nodes.map(node => (

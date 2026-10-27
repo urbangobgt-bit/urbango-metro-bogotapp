@@ -40,6 +40,297 @@ import {
 import { useLanguage } from '../LanguageContext';
 import { sanitizeInput, sanitizeFormData, sanitizeSearchQuery } from '../utils/securitySanitizer';
 
+const EMPLOYMENT_STRINGS = {
+  es: {
+    alcaldiaBadge: 'Alcaldía Mayor de Bogotá',
+    consorcioBadge: 'Consorcio Metro Línea 1',
+    vacantesBadge: '220+ Vacantes Abiertas',
+    titlePrefix: 'Empleo y Convocatorias',
+    titleHighlight: 'Metro Línea 1',
+    subtitle: 'Oportunidades laborales directas y transparentes para la construcción, montaje electromecánico y operación de la Primera Línea del Metro de Bogotá.',
+    shareBtn: 'Compartir',
+    copiedLink: '¡Enlace copiado!',
+    guaranteeTitle: 'GARANTÍA DE TRANSPARENCIA DISTRITAL',
+    guaranteeDesc: 'Todos los procesos de selección son 100% gratuitos. Ninguna entidad o intermediario solicita dinero por exámenes médicos o formularios.',
+    guideTitle: 'Guía del Aspirante',
+    stepsTitle: '¿Cómo aplicar paso a paso a las vacantes del Metro?',
+    stepPrefix: 'Paso',
+    btnPrevStep: 'Paso Anterior',
+    btnNextStep: 'Siguiente Paso',
+    btnViewVacancies: 'Ver Vacantes Activas',
+    keyFactLabel: 'Dato Clave:',
+    directAccessLabel: 'Acceso directo para completar este paso:',
+    authorizedBadge: 'Canales Autorizados',
+    portalsTitle: 'Portales Oficiales de Postulación Directa',
+    portalsSub: 'Enlaces verificados · Vigencia 2026',
+    bogotaTrabajaBadge: 'Distrito Capital · Agencia Pública',
+    bogotaTrabajaTitle: 'Agencia Pública de Empleo de Bogotá',
+    bogotaTrabajaDesc: 'Inscribe tu hoja de vida en el portal distrital de la Secretaría de Desarrollo Económico y postúlate a las ferias del Metro.',
+    btnBogotaTrabaja: 'Ir a Bogotá Trabaja',
+    elEmpleoBadge: 'Consorcio Metro Línea 1',
+    elEmpleoTitle: 'El Empleo - Consorcio Metro Línea 1',
+    elEmpleoDesc: 'Consulta las vacantes empresariales publicadas por el concesionario constructor para frentes de obra y pre-operación.',
+    btnElEmpleo: 'Ver Vacantes en El Empleo - Metro Línea 1',
+    activeCallsBadge: 'Convocatorias Vigentes',
+    availableOffersBadge: 'Ofertas Disponibles',
+    classifiedTitle: 'Vacantes Clasificadas por Área',
+    searchPlaceholder: 'Buscar por cargo, palabra clave o requisito...',
+    noExpFilter: 'Sin experiencia',
+    allAreasFilter: 'Todas las Áreas',
+    swipeHint: 'Desliza, arrastra o usa la flecha para explorar las áreas',
+    swipeBtn: 'Deslizar',
+    noJobsFound: 'No se encontraron vacantes con los filtros seleccionados.',
+    resetFilters: 'Restablecer todos los filtros',
+    activeCallsCount: 'convocatorias activas',
+    badgeNoExp: 'Sin Experiencia Previa',
+    badgeHighDemand: 'Alta Demanda',
+    plazasDisponibles: 'Plazas Disponibles',
+    requirementsTitle: 'Perfil & Requisitos Detallados',
+    dutiesTitle: 'Funciones del Puesto',
+    trainingTitle: 'Capacitación Pagada por la Empresa',
+    salaryTitle: 'Remuneración y Tipo de Contrato',
+    contractPrefix: 'Contrato:',
+    trackingNotice: 'Radicación inmediata con código único de seguimiento distrital.',
+    btnApplyNow: 'Postularme Ahora',
+    modalTitle: 'Postulación Digital Oficial',
+    modalSuccessTitle: '¡Postulación Radicada con Éxito!',
+    modalSuccessDesc: 'ha quedado registrado en la base de datos de talento del consorcio constructor.',
+    radicadoCode: 'Código Único de Radicado',
+    nextStepsTitle: 'Siguientes Pasos Oficiales:',
+    step1Desc: 'El equipo de selección validará tus datos en el transcurso de 3 a 5 días hábiles.',
+    step2Desc: 'Recibirás un mensaje SMS y correo con la citación a pruebas o entrevistas.',
+    step3Desc: 'Para cargos sin experiencia, se agendará la inducción en el simulador de Patio Taller Bosa.',
+    btnAcceptContinue: 'Aceptar y Continuar',
+    keyRequirements: 'Requisitos Clave:',
+    formName: 'Nombre Completo *',
+    formId: 'Cédula de Ciudadanía *',
+    formPhone: 'Teléfono Móvil (WhatsApp) *',
+    formEmail: 'Correo Electrónico *',
+    formLocality: 'Localidad de Residencia en Bogotá',
+    educationLevel: 'Nivel de Estudios Culminado',
+    sectorExp: 'Experiencia en el Sector',
+    termsAccept: 'Certifico que los datos suministrados son verídicos y autorizo el tratamiento de mis datos de acuerdo con las políticas de talento humano de la Empresa Metro de Bogotá y el Consorcio Metro Línea 1.',
+    cancelBtn: 'Cancelar',
+    confirmBtn: 'Confirmar Postulación'
+  },
+  en: {
+    alcaldiaBadge: "Mayor's Office of Bogotá",
+    consorcioBadge: 'Metro Line 1 Consortium',
+    vacantesBadge: '220+ Open Positions',
+    titlePrefix: 'Metro Line 1',
+    titleHighlight: 'Jobs & Recruitment',
+    subtitle: 'Direct and transparent job opportunities for construction, electromechanical assembly, and operations of Bogotá Metro Line 1.',
+    shareBtn: 'Share',
+    copiedLink: 'Link copied!',
+    guaranteeTitle: 'DISTRICT TRANSPARENCY GUARANTEE',
+    guaranteeDesc: 'All selection processes are 100% free. No entity or intermediary requests money for medical exams or application forms.',
+    guideTitle: 'Applicant Guide',
+    stepsTitle: 'How to apply step by step for Bogotá Metro jobs?',
+    stepPrefix: 'Step',
+    btnPrevStep: 'Previous Step',
+    btnNextStep: 'Next Step',
+    btnViewVacancies: 'View Active Openings',
+    keyFactLabel: 'Key Insight:',
+    directAccessLabel: 'Direct access to complete this step:',
+    authorizedBadge: 'Authorized Channels',
+    portalsTitle: 'Official Direct Application Portals',
+    portalsSub: 'Verified links · Valid 2026',
+    bogotaTrabajaBadge: 'Capital District · Public Agency',
+    bogotaTrabajaTitle: 'Bogotá Public Employment Agency',
+    bogotaTrabajaDesc: 'Register your resume on the district portal of the Secretariat of Economic Development and apply to Metro job fairs.',
+    btnBogotaTrabaja: 'Go to Bogotá Trabaja',
+    elEmpleoBadge: 'Metro Line 1 Consortium',
+    elEmpleoTitle: 'El Empleo - Metro Line 1 Consortium',
+    elEmpleoDesc: 'Check company openings posted by the construction concessionaire for work fronts and pre-operations.',
+    btnElEmpleo: 'View Openings on El Empleo - Metro Line 1',
+    activeCallsBadge: 'Active Job Calls',
+    availableOffersBadge: 'Available Positions',
+    classifiedTitle: 'Positions Classified by Area',
+    searchPlaceholder: 'Search by position, keyword or requirement...',
+    noExpFilter: 'No experience',
+    allAreasFilter: 'All Areas',
+    swipeHint: 'Swipe, drag or use arrow to explore areas',
+    swipeBtn: 'Slide',
+    noJobsFound: 'No vacancies found matching the selected filters.',
+    resetFilters: 'Reset all filters',
+    activeCallsCount: 'active openings',
+    badgeNoExp: 'No Prior Experience',
+    badgeHighDemand: 'High Demand',
+    plazasDisponibles: 'Positions Available',
+    requirementsTitle: 'Profile & Detailed Requirements',
+    dutiesTitle: 'Job Responsibilities',
+    trainingTitle: 'Fully Paid Company Training',
+    salaryTitle: 'Salary & Contract Type',
+    contractPrefix: 'Contract:',
+    trackingNotice: 'Immediate application submission with official district tracking code.',
+    btnApplyNow: 'Apply Now',
+    modalTitle: 'Official Digital Application',
+    modalSuccessTitle: 'Application Successfully Submitted!',
+    modalSuccessDesc: 'has been registered in the construction consortium talent database.',
+    radicadoCode: 'Unique Tracking Code',
+    nextStepsTitle: 'Official Next Steps:',
+    step1Desc: 'The recruitment team will validate your information within 3 to 5 business days.',
+    step2Desc: 'You will receive an SMS and email with details for tests or interviews.',
+    step3Desc: 'For entry-level roles, simulator induction will be scheduled at Bosa Yard Depot.',
+    btnAcceptContinue: 'Accept and Continue',
+    keyRequirements: 'Key Requirements:',
+    formName: 'Full Name *',
+    formId: 'ID / Citizenship Card *',
+    formPhone: 'Mobile Phone (WhatsApp) *',
+    formEmail: 'Email Address *',
+    formLocality: 'Locality of Residence in Bogotá',
+    educationLevel: 'Highest Level of Education Completed',
+    sectorExp: 'Experience in the Industry',
+    termsAccept: 'I certify that the information provided is accurate and authorize the processing of my data in accordance with human talent policies.',
+    cancelBtn: 'Cancel',
+    confirmBtn: 'Confirm Application'
+  },
+  pt: {
+    alcaldiaBadge: 'Prefeitura de Bogotá',
+    consorcioBadge: 'Consórcio Metrô Linha 1',
+    vacantesBadge: '220+ Vagas Abertas',
+    titlePrefix: 'Empregos e Vagas',
+    titleHighlight: 'Metrô Linha 1',
+    subtitle: 'Oportunidades de trabalho diretas e transparentes para construção, montagem eletromecânica e operação da Primeira Linha do Metrô de Bogotá.',
+    shareBtn: 'Compartilhar',
+    copiedLink: 'Link copiado!',
+    guaranteeTitle: 'GARANTIA DE TRANSPARÊNCIA DISTRITAL',
+    guaranteeDesc: 'Todos os processos de seleção são 100% gratuitos. Nenhuma entidade ou intermediário solicita dinheiro para exames médicos ou formulários.',
+    guideTitle: 'Guia do Candidato',
+    stepsTitle: 'Como se candidatar passo a passo às vagas do Metrô?',
+    stepPrefix: 'Passo',
+    btnPrevStep: 'Passo Anterior',
+    btnNextStep: 'Próximo Passo',
+    btnViewVacancies: 'Ver Vagas Ativas',
+    keyFactLabel: 'Dado Principal:',
+    directAccessLabel: 'Acesso direto para completar esta etapa:',
+    authorizedBadge: 'Canais Autorizados',
+    portalsTitle: 'Portais Oficiais de Inscrição Direta',
+    portalsSub: 'Links verificados · Vigência 2026',
+    bogotaTrabajaBadge: 'Distrito Capital · Agência Pública',
+    bogotaTrabajaTitle: 'Agência Pública de Emprego de Bogotá',
+    bogotaTrabajaDesc: 'Cadastre seu currículo no portal distrital da Secretaria de Desenvolvimento Econômico e candidate-se às feiras do Metrô.',
+    btnBogotaTrabaja: 'Acessar Bogotá Trabaja',
+    elEmpleoBadge: 'Consórcio Metrô Linha 1',
+    elEmpleoTitle: 'El Empleo - Consórcio Metrô Linha 1',
+    elEmpleoDesc: 'Consulte as vagas empresariais publicadas pela concessionária de construção para frentes de obra e pré-operação.',
+    btnElEmpleo: 'Ver Vagas em El Empleo - Metrô Linha 1',
+    activeCallsBadge: 'Processos Seletivos Vigentes',
+    availableOffersBadge: 'Vagas Disponíveis',
+    classifiedTitle: 'Vagas Classificadas por Área',
+    searchPlaceholder: 'Buscar por cargo, palavra-chave ou requisito...',
+    noExpFilter: 'Sem experiência',
+    allAreasFilter: 'Todas as Áreas',
+    swipeHint: 'Deslize, arraste ou use a seta para explorar as áreas',
+    swipeBtn: 'Deslizar',
+    noJobsFound: 'Nenhuma vaga encontrada com os filtros selecionados.',
+    resetFilters: 'Redefinir todos os filtros',
+    activeCallsCount: 'vagas ativas',
+    badgeNoExp: 'Sem Experiência Prévia',
+    badgeHighDemand: 'Alta Demanda',
+    plazasDisponibles: 'Vagas Disponíveis',
+    requirementsTitle: 'Perfil & Requisitos Detalhados',
+    dutiesTitle: 'Funções do Cargo',
+    trainingTitle: 'Capacitação Remunerada pela Empresa',
+    salaryTitle: 'Remuneração e Tipo de Contrato',
+    contractPrefix: 'Contrato:',
+    trackingNotice: 'Inscrição imediata com código exclusivo de acompanhamento oficial.',
+    btnApplyNow: 'Candidatar-me Agora',
+    modalTitle: 'Inscrição Digital Oficial',
+    modalSuccessTitle: 'Inscrição Concluída com Sucesso!',
+    modalSuccessDesc: 'foi registrado no banco de talentos do consórcio construtor.',
+    radicadoCode: 'Código Único de Registro',
+    nextStepsTitle: 'Próximos Passos Oficiais:',
+    step1Desc: 'A equipe de seleção validará seus dados no prazo de 3 a 5 dias úteis.',
+    step2Desc: 'Você receberá uma mensagem SMS e e-mail com a convocação para testes ou entrevistas.',
+    step3Desc: 'Para cargos sem experiência, a integração no simulador do Pátio Oficina de Bosa será agendada.',
+    btnAcceptContinue: 'Aceitar e Continuar',
+    keyRequirements: 'Requisitos Principais:',
+    formName: 'Nome Completo *',
+    formId: 'Documento de Identidade *',
+    formPhone: 'Celular (WhatsApp) *',
+    formEmail: 'E-mail *',
+    formLocality: 'Localidade de Residência em Bogotá',
+    educationLevel: 'Nível Educacional Concluído',
+    sectorExp: 'Experiência no Setor',
+    termsAccept: 'Declaro que as informações são verdadeiras e autorizo o tratamento de dados de acordo com as políticas de recursos humanos.',
+    cancelBtn: 'Cancelar',
+    confirmBtn: 'Confirmar Inscrição'
+  },
+  zh: {
+    alcaldiaBadge: '波哥大市政府',
+    consorcioBadge: '地铁一号线特许经营公司',
+    vacantesBadge: '220+ 开放岗位',
+    titlePrefix: '地铁1号线',
+    titleHighlight: '招聘与岗位',
+    subtitle: '为波哥大地铁一号线的建设、机电安装及运营提供直接且透明的就业机会。',
+    shareBtn: '分享',
+    copiedLink: '已复制链接！',
+    guaranteeTitle: '地区透明度保证',
+    guaranteeDesc: '所有招聘流程 100% 免费。任何机构或中介均不得收取体检或表格费用。',
+    guideTitle: '应聘者指南',
+    stepsTitle: '如何按步骤申请波哥大地铁岗位？',
+    stepPrefix: '步骤',
+    btnPrevStep: '上一步',
+    btnNextStep: '下一步',
+    btnViewVacancies: '查看在招岗位',
+    keyFactLabel: '核心要点：',
+    directAccessLabel: '直通官方入口完成该步骤：',
+    authorizedBadge: '官方授权渠道',
+    portalsTitle: '官方直聘申请通道',
+    portalsSub: '官方验证通道 · 2026年有效',
+    bogotaTrabajaBadge: '首都特区 · 公共就业局',
+    bogotaTrabajaTitle: '波哥大公共就业服务局',
+    bogotaTrabajaDesc: '在特区经济发展局平台录入您的个人履历，报名参与地铁专场招聘会。',
+    btnBogotaTrabaja: '前往 Bogotá Trabaja 平台',
+    elEmpleoBadge: '地铁一号线联合体',
+    elEmpleoTitle: 'El Empleo - 波哥大地铁一号线特许经营专区',
+    elEmpleoDesc: '查询总承包商及建设联合体针对工程一线工区与运营筹备阶段发布的全部在招岗位。',
+    btnElEmpleo: '在 El Empleo 查看一号线岗位',
+    activeCallsBadge: '当前有效招聘',
+    availableOffersBadge: '个岗位开放中',
+    classifiedTitle: '按专业领域分类岗位',
+    searchPlaceholder: '按职位名称、关键词或要求搜索...',
+    noExpFilter: '无经验要求',
+    allAreasFilter: '全部领域',
+    swipeHint: '滑动或使用箭头浏览各专业领域',
+    swipeBtn: '滑动',
+    noJobsFound: '未找到符合所选条件的在招岗位。',
+    resetFilters: '重置全部筛选条件',
+    activeCallsCount: '个在招职位',
+    badgeNoExp: '无需既往经验',
+    badgeHighDemand: '热门需求',
+    plazasDisponibles: '个名额开放',
+    requirementsTitle: '任职要求与详细条件',
+    dutiesTitle: '岗位主要职责',
+    trainingTitle: '公司全额带薪岗前培训',
+    salaryTitle: '薪酬待遇与合同性质',
+    contractPrefix: '合同类型：',
+    trackingNotice: '即时在线申报并获取特区官方唯一跟踪备案编码。',
+    btnApplyNow: '立即申请报名',
+    modalTitle: '官方数字化报名通道',
+    modalSuccessTitle: '报名申请已成功受理！',
+    modalSuccessDesc: '已正式录入地铁建设特许经营联合体人才储备库。',
+    radicadoCode: '官方唯一受理编号',
+    nextStepsTitle: '官方后续流程：',
+    step1Desc: '招聘团队将在3至5个工作日内完成基本资料初审。',
+    step2Desc: '您将收到手机短信与电子邮件通知，告知具体的测评或面试安排。',
+    step3Desc: '无经验岗位入职人员将统一前往博萨车辆段全动模拟舱开展岗前实操培训。',
+    btnAcceptContinue: '确定并返回',
+    keyRequirements: '核心要求：',
+    formName: '真实全名 *',
+    formId: '身份证件号码 *',
+    formPhone: '联系手机号 (WhatsApp) *',
+    formEmail: '电子邮箱地址 *',
+    formLocality: '居住所在行政区 (波哥大)',
+    educationLevel: '最高已毕业学历',
+    sectorExp: '交通或工程行业经验',
+    termsAccept: '本人郑重承诺所填信息完全属实，并同意根据个人数据保护法规及地铁招聘章程进行合规处理。',
+    cancelBtn: '取消',
+    confirmBtn: '确认提交报名'
+  }
+};
+
 export default function PortalEmpleoView({
   dark = false,
   onClose = null,
@@ -47,10 +338,12 @@ export default function PortalEmpleoView({
   initialJobId = null
 }) {
   const { t, language } = useLanguage();
+  const activeLang = ['es', 'en', 'pt', 'zh'].includes(language?.toLowerCase()) ? language.toLowerCase() : 'es';
+  const empTexts = EMPLOYMENT_STRINGS[activeLang] || EMPLOYMENT_STRINGS.es;
 
   // Localized data reactive to active language
-  const stepsData = useMemo(() => getLocalizedJobSteps(language), [language]);
-  const areasData = useMemo(() => getLocalizedJobAreas(language), [language]);
+  const stepsData = useMemo(() => getLocalizedJobSteps(activeLang), [activeLang]);
+  const areasData = useMemo(() => getLocalizedJobAreas(activeLang), [activeLang]);
 
   // Step selection state (1 to 4)
   const [activeStep, setActiveStep] = useState(1);
@@ -309,22 +602,22 @@ export default function PortalEmpleoView({
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
                 <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-[#B30000] text-white">
-                  Alcaldía Mayor de Bogotá
+                  {empTexts.alcaldiaBadge}
                 </span>
                 <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                   dark ? 'bg-zinc-800 border-zinc-700 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 }`}>
-                  Consorcio Metro Línea 1
+                  {empTexts.consorcioBadge}
                 </span>
                 <span className="text-[10px] font-bold text-zinc-400 hidden sm:inline">
-                  220+ Vacantes Abiertas
+                  {empTexts.vacantesBadge}
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight">
-                Empleo y Convocatorias <span className="text-[#2D8B3C]">Metro Línea 1</span>
+                {empTexts.titlePrefix} <span className="text-[#2D8B3C]">{empTexts.titleHighlight}</span>
               </h2>
               <p className={`text-xs sm:text-sm font-medium mt-1 max-w-2xl leading-relaxed ${dark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-                Oportunidades laborales directas y transparentes para la construcción, montaje electromecánico y operación de la Primera Línea del Metro de Bogotá.
+                {empTexts.subtitle}
               </p>
             </div>
           </div>
@@ -340,7 +633,7 @@ export default function PortalEmpleoView({
               title="Compartir convocatorias"
             >
               <Share2 size={15} />
-              <span className="hidden sm:inline">{copiedLink ? '¡Enlace copiado!' : 'Compartir'}</span>
+              <span className="hidden sm:inline">{copiedLink ? empTexts.copiedLink : empTexts.shareBtn}</span>
             </button>
             {onClose && (
               <button
@@ -363,10 +656,10 @@ export default function PortalEmpleoView({
           <ShieldCheck size={20} className="text-emerald-500 shrink-0" />
           <div className="flex-1 min-w-0">
             <span className="font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider text-[10px] block">
-              Garantía de Transparencia Distrital
+              {empTexts.guaranteeTitle}
             </span>
             <span className="font-semibold text-[11px] sm:text-xs">
-              Todos los procesos de selección son <strong>100% gratuitos</strong>. Ninguna entidad o intermediario solicita dinero por exámenes médicos o formularios.
+              {empTexts.guaranteeDesc}
             </span>
           </div>
         </div>
@@ -379,14 +672,14 @@ export default function PortalEmpleoView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-[#2D8B3C] block mb-0.5">
-              Guía del Aspirante
+              {empTexts.guideTitle}
             </span>
             <h3 className={`font-black text-lg sm:text-xl tracking-tight ${dark ? 'text-white' : 'text-zinc-900'}`}>
-              {t('jobsModule.stepsTitle', '¿Cómo aplicar paso a paso a las vacantes del Metro?')}
+              {empTexts.stepsTitle}
             </h3>
           </div>
           <span className="text-xs font-medium text-zinc-400">
-            {t('jobsModule.stepPrefix', 'Paso')} {activeStep} / 4
+            {empTexts.stepPrefix} {activeStep} / 4
           </span>
         </div>
 
@@ -428,7 +721,7 @@ export default function PortalEmpleoView({
                       ? 'bg-white/20 text-white'
                       : dark ? 'bg-zinc-700/50 text-zinc-400' : 'bg-zinc-200/70 text-zinc-600'
                   }`}>
-                    {t('jobsModule.stepPrefix', 'Paso')} {s.step}
+                    {empTexts.stepPrefix} {s.step}
                   </span>
                 </div>
                 <h4 className="font-black text-xs sm:text-sm leading-snug line-clamp-1">
@@ -461,7 +754,7 @@ export default function PortalEmpleoView({
                   </div>
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-[#2D8B3C]">
-                      {t('jobsModule.stepPrefix', 'Paso')} {current.step}
+                      {empTexts.stepPrefix} {current.step}
                     </span>
                     <h4 className={`font-black text-base sm:text-lg leading-tight ${dark ? 'text-white' : 'text-zinc-900'}`}>
                       {current.title}
@@ -477,7 +770,7 @@ export default function PortalEmpleoView({
                         dark ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : 'border-zinc-200 text-zinc-700 hover:bg-zinc-100'
                       }`}
                     >
-                      ← {t('jobsModule.btnPrevStep', 'Paso Anterior')}
+                      ← {empTexts.btnPrevStep}
                     </button>
                   )}
                   {activeStep < 4 ? (
@@ -485,7 +778,7 @@ export default function PortalEmpleoView({
                       onClick={() => setActiveStep(prev => prev + 1)}
                       className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#2D8B3C] text-white hover:bg-[#1E6B2C] transition-colors shadow-sm"
                     >
-                      {t('jobsModule.btnNextStep', 'Siguiente Paso')} →
+                      {empTexts.btnNextStep} →
                     </button>
                   ) : (
                     <button
@@ -496,7 +789,7 @@ export default function PortalEmpleoView({
                       className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#2D8B3C] text-white hover:bg-[#1E6B2C] transition-colors shadow-sm flex items-center gap-1.5"
                     >
                       <Briefcase size={13} />
-                      <span>{t('jobsModule.btnViewVacancies', 'Ver Vacantes Activas')}</span>
+                      <span>{empTexts.btnViewVacancies}</span>
                     </button>
                   )}
                 </div>
@@ -513,7 +806,7 @@ export default function PortalEmpleoView({
               }`}>
                 <Info size={16} className="text-[#2D8B3C] shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <strong className="text-[#2D8B3C]">Dato Clave: </strong>
+                  <strong className="text-[#2D8B3C]">{empTexts.keyFactLabel} </strong>
                   {current.detail}
                 </div>
               </div>
@@ -522,7 +815,7 @@ export default function PortalEmpleoView({
               {current.url && (
                 <div className="mt-3.5 pt-3 border-t border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between flex-wrap gap-2">
                   <span className="text-[11px] font-semibold text-zinc-400">
-                    Acceso directo para completar este paso:
+                    {empTexts.directAccessLabel}
                   </span>
                   <a
                     href={current.url}
@@ -547,14 +840,14 @@ export default function PortalEmpleoView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-[#B30000] block mb-0.5">
-              Canales Autorizados
+              {empTexts.authorizedBadge}
             </span>
             <h3 className={`font-black text-lg sm:text-xl tracking-tight ${dark ? 'text-white' : 'text-zinc-900'}`}>
-              Portales Oficiales de Postulación Directa
+              {empTexts.portalsTitle}
             </h3>
           </div>
           <span className="text-xs font-semibold text-zinc-400">
-            Enlaces verificados · Vigencia 2026
+            {empTexts.portalsSub}
           </span>
         </div>
 
@@ -587,7 +880,7 @@ export default function PortalEmpleoView({
               rel="noopener noreferrer"
               className="w-full py-3.5 px-4 rounded-xl bg-[#B30000] hover:bg-[#C8102E] active:scale-[0.99] text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 text-center"
             >
-              <span>Ir a Bogotá Trabaja</span>
+              <span>{empTexts.btnBogotaTrabaja}</span>
               <ExternalLink size={16} />
             </a>
           </div>
@@ -620,7 +913,7 @@ export default function PortalEmpleoView({
               rel="noopener noreferrer"
               className="w-full py-3.5 px-4 rounded-xl bg-[#2D8B3C] hover:bg-[#1E6B2C] active:scale-[0.99] text-white font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 text-center"
             >
-              <span>Ver Vacantes en El Empleo - Metro Línea 1</span>
+              <span>{empTexts.btnElEmpleo}</span>
               <ExternalLink size={16} />
             </a>
           </div>

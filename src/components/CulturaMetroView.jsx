@@ -115,7 +115,7 @@ export default function CulturaMetroView({
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
-              {t('cultura.heroTitle', 'CULTURA Y')} <span className="text-emerald-400">{t('cultura.heroMotto', '#BOGOTÁMODOMETRO')}</span>
+              {t('cultura.guideTitle', 'Guía de Convivencia y Pedagógica #BogotáModoMetro')}
             </h1>
 
             <p className="text-sm sm:text-base text-emerald-100/90 leading-relaxed font-medium">
